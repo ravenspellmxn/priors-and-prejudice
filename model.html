@@ -1,0 +1,1152 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found]){display:none!important}</style></head><body>
+<title>Block Belief Machine</title>
+<style>
+  :root {
+    --paper: #eef0f4;
+    --card: #ffffff;
+    --ink: #1b1d23;
+    --muted: #5c6473;
+    --faint: #8a91a0;
+    --hair: #dde1e8;
+    --hair-strong: #cbd1db;
+    --accent: #7c3aed;
+    --accent-soft: #7c3aed1f;
+    --ok: #2f8f5b;
+    --warn: #b7791f;
+    --grid: #e6e9ef;
+    --right: #2a78d6;
+    --left: #e34948;
+    --unb: #6f6b76;
+    --acc: #1baf7a;
+    --right-soft: #2a78d622;
+    --left-soft: #e3494822;
+    --unb-soft: #6f6b7622;
+    --shadow: 0 1px 2px rgba(20,22,30,.06), 0 8px 24px rgba(20,22,30,.06);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #131219;
+      --card: #1d1c26;
+      --ink: #ece9f2;
+      --muted: #9a97a8;
+      --faint: #6f6c7e;
+      --hair: #2b2937;
+      --hair-strong: #3a3749;
+      --accent: #a78bfa;
+      --accent-soft: #a78bfa22;
+      --ok: #52c08a;
+      --warn: #e0a94a;
+      --grid: #262433;
+      --right: #3987e5;
+      --left: #e66767;
+      --unb: #9b97a6;
+      --acc: #199e70;
+      --right-soft: #3987e522;
+      --left-soft: #e6676722;
+      --unb-soft: #9b97a622;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #131219; --card: #1d1c26; --ink: #ece9f2; --muted: #9a97a8; --faint: #6f6c7e;
+    --hair: #2b2937; --hair-strong: #3a3749; --accent: #a78bfa; --accent-soft: #a78bfa22;
+    --ok: #52c08a; --warn: #e0a94a; --grid: #262433;
+    --right: #3987e5; --left: #e66767; --unb: #9b97a6; --acc: #199e70;
+    --right-soft: #3987e522; --left-soft: #e6676722; --unb-soft: #9b97a622;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35); color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .mono { font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, "Cascadia Code", Consolas, monospace; font-variant-numeric: tabular-nums; }
+
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 28px 20px 56px; }
+
+  header.top { margin-bottom: 22px; }
+  .eyebrow {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 11px; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--accent); margin: 0 0 6px;
+  }
+  h1 {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-weight: 600; font-size: clamp(24px, 4vw, 34px); letter-spacing: -.01em;
+    margin: 0 0 6px; text-wrap: balance;
+  }
+  .lede { color: var(--muted); margin: 0; max-width: 66ch; }
+
+  .tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 22px 0; }
+  .tile {
+    background: var(--card); border: 1px solid var(--hair); border-radius: 12px;
+    padding: 14px 15px; box-shadow: var(--shadow); min-width: 0;
+  }
+  .tile .lbl {
+    font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--faint);
+    margin: 0 0 8px;
+  }
+  .tile .val { font-size: 26px; font-weight: 600; letter-spacing: -.01em; line-height: 1.15; }
+  .tile .sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .envbar { height: 7px; border-radius: 4px; margin-top: 10px; overflow: hidden; display: flex; gap: 2px; background: var(--card); }
+  .envbar > i { display: block; height: 100%; }
+  .envbar > .r { background: var(--right); }
+  .envbar > .u { background: var(--unb); }
+  .envbar > .l { background: var(--left); }
+
+  .pill {
+    display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600;
+    padding: 4px 10px; border-radius: 999px; letter-spacing: .01em; white-space: nowrap;
+  }
+  .pill .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+  .pill.r { background: var(--right-soft); color: var(--ink); }
+  .pill.u { background: var(--unb-soft); color: var(--ink); }
+  .pill.l { background: var(--left-soft); color: var(--ink); }
+  .pill.ok   { background: color-mix(in srgb, var(--ok) 16%, transparent); color: var(--ok); }
+  .pill.warn { background: color-mix(in srgb, var(--warn) 18%, transparent); color: var(--warn); }
+  .pill.mute { background: var(--accent-soft); color: var(--muted); }
+
+  .grid2 { display: grid; grid-template-columns: 308px 1fr; gap: 18px; align-items: start; }
+
+  .panel {
+    background: var(--card); border: 1px solid var(--hair); border-radius: 14px;
+    padding: 18px; box-shadow: var(--shadow);
+  }
+  .panel + .panel { margin-top: 16px; }
+  .panel h2 {
+    font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
+    margin: 0 0 14px; font-weight: 700; display: flex; justify-content: space-between; align-items: baseline; gap: 10px;
+  }
+  .panel h2 .hint { font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--faint); font-size: 12px; }
+  .panel.world h2 { color: var(--right); }
+  .panel.observer h2 { color: var(--acc); }
+
+  .ctrl { margin-bottom: 18px; }
+  .ctrl:last-child { margin-bottom: 0; }
+  .ctrl .row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; gap: 8px; }
+  .ctrl label { font-size: 13px; font-weight: 600; }
+  .ctrl .rdval { font-size: 13px; color: var(--muted); white-space: nowrap; }
+  .ctrl .note { font-size: 12px; color: var(--faint); margin-top: 6px; line-height: 1.45; }
+  input[type="range"] {
+    -webkit-appearance: none; appearance: none; width: 100%; height: 5px; border-radius: 4px;
+    background: var(--hair-strong); outline: none; margin: 4px 0;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%;
+    background: var(--accent); border: 3px solid var(--card); box-shadow: 0 1px 3px rgba(0,0,0,.3); cursor: pointer;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 18px; height: 18px; border-radius: 50%; background: var(--accent);
+    border: 3px solid var(--card); box-shadow: 0 1px 3px rgba(0,0,0,.3); cursor: pointer;
+  }
+  input[type="range"]:focus-visible { box-shadow: 0 0 0 3px var(--accent-soft); }
+  input[type="range"]:disabled { opacity: .35; }
+  input[type="range"].bias { background: linear-gradient(90deg, var(--left), var(--hair-strong) 50%, var(--right)); }
+  .biasfill { height: 10px; border-radius: 5px; overflow: hidden; display: flex; margin-top: 9px; border: 1px solid var(--hair); }
+  .biasfill > .l { background: var(--left); }
+  .biasfill > .r { background: var(--right); flex: 1; }
+
+  .seg { display: inline-flex; border: 1px solid var(--hair-strong); border-radius: 9px; overflow: hidden; }
+  .seg.full { display: flex; }
+  .seg.full button { flex: 1; }
+  .seg button {
+    appearance: none; border: 0; background: transparent; color: var(--muted); cursor: pointer;
+    padding: 7px 10px; font-size: 12.5px; font-weight: 600; font-family: inherit; white-space: nowrap;
+  }
+  .seg button.on { background: var(--accent-soft); color: var(--ink); }
+  .seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+  .check { display: flex; align-items: center; gap: 9px; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .check input { width: 16px; height: 16px; accent-color: var(--accent); margin: 0; }
+
+  .btn {
+    appearance: none; width: 100%; margin-top: 4px; cursor: pointer;
+    background: var(--accent); color: #fff; border: 0; border-radius: 10px;
+    padding: 11px 14px; font-size: 14px; font-weight: 600; font-family: inherit;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn:hover { filter: brightness(1.06); }
+  .btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+  .teach {
+    background: var(--accent-soft); border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+    border-radius: 12px; padding: 13px 15px; margin: 0 0 16px; font-size: 13.5px; line-height: 1.55;
+  }
+  .teach .num { font-weight: 600; }
+
+  .chart { position: relative; }
+  .chart svg { display: block; width: 100%; height: auto; }
+  .clab { font-family: ui-monospace, Menlo, monospace; font-size: 10px; fill: var(--faint); }
+  .cend { font-family: ui-monospace, Menlo, monospace; font-size: 10.5px; fill: var(--muted); }
+  .legend { display: flex; gap: 14px; margin-top: 8px; font-size: 12px; color: var(--muted); flex-wrap: wrap; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex: none; }
+  .legend i.line { width: 16px; height: 0; border-top: 2px solid; border-radius: 0; }
+  .legend i.dash { width: 16px; height: 0; border-top: 2px dashed; border-radius: 0; }
+  .legend i.ring { background: transparent; border: 2px solid var(--muted); }
+  .caption { font-size: 13px; color: var(--muted); margin: 10px 0 0; line-height: 1.5; max-width: 76ch; }
+  .caption b { color: var(--ink); font-weight: 600; }
+  .howto { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 0 0 16px; }
+  .howto div { background: var(--card); border: 1px solid var(--hair); border-radius: 10px; padding: 10px 12px; font-size: 12.5px; line-height: 1.45; color: var(--muted); }
+  .howto div b { display: block; color: var(--ink); font-size: 12px; margin-bottom: 2px; }
+  .ytitle { font-size: 10.5px; fill: var(--muted); }
+  .band { font-family: ui-monospace, Menlo, monospace; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; fill: var(--muted); }
+
+  .tooltip {
+    position: fixed; pointer-events: none; z-index: 20; opacity: 0; transition: opacity .08s;
+    background: var(--card); border: 1px solid var(--hair-strong); border-radius: 9px;
+    box-shadow: var(--shadow); padding: 8px 10px; font-size: 12px; min-width: 190px;
+  }
+  .tooltip .tt-h { font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: var(--faint); margin-bottom: 5px; }
+  .tooltip .tt-r { display: flex; justify-content: space-between; gap: 14px; align-items: center; }
+  .tooltip .tt-r .k { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); }
+  .tooltip .tt-r .k i { width: 12px; height: 0; border-top: 2px solid; display: inline-block; }
+  .tooltip .tt-r .v { font-family: ui-monospace, Menlo, monospace; font-variant-numeric: tabular-nums; font-weight: 600; }
+  .tooltip hr { border: 0; border-top: 1px solid var(--hair); margin: 5px 0; }
+
+  /* joint grid */
+  .board { display: grid; grid-template-columns: 84px repeat(3, 1fr) 96px; gap: 6px; align-items: stretch; font-size: 12.5px; }
+  .board .hd { color: var(--muted); font-size: 11px; line-height: 1.3; text-align: center; padding: 0 2px 4px; align-self: end; }
+  .board .hd b { display: block; color: var(--ink); font-size: 12px; }
+  .board .rh { color: var(--muted); font-size: 12px; display: flex; align-items: center; gap: 6px; }
+  .board .rh i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  .board .cell {
+    position: relative; border: 1px solid var(--hair); border-radius: 8px; padding: 10px 8px; text-align: center;
+    overflow: hidden; background: var(--card);
+  }
+  .board .cell > i { position: absolute; inset: 0; background: var(--right); opacity: 0; }
+  .board .cell > span { position: relative; font-family: ui-monospace, Menlo, monospace; font-variant-numeric: tabular-nums; font-weight: 600; }
+  .board .marg { border-style: dashed; }
+  .board .marg > i { background: var(--acc); }
+  .board .arrow { color: var(--faint); font-size: 12px; text-align: center; align-self: center; }
+  .board .corner { color: var(--faint); font-size: 11px; text-align: center; align-self: center; line-height: 1.3; }
+  .boardnote { font-size: 12.5px; color: var(--muted); margin: 12px 0 0; line-height: 1.5; }
+
+  details.data { margin-top: 16px; }
+  details.data summary { cursor: pointer; font-size: 13px; color: var(--accent); font-weight: 600; }
+  .tablewrap { overflow-x: auto; margin-top: 12px; }
+  table { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+  th, td { text-align: right; padding: 5px 9px; border-bottom: 1px solid var(--hair); white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  td.mono, th.mono { font-family: ui-monospace, Menlo, monospace; font-variant-numeric: tabular-nums; }
+  thead th { color: var(--faint); font-weight: 600; font-size: 11px; letter-spacing: .04em; text-transform: uppercase; }
+
+  footer { margin-top: 28px; color: var(--faint); font-size: 12px; line-height: 1.6; max-width: 80ch; }
+  footer code { font-family: ui-monospace, Menlo, monospace; color: var(--muted); }
+  footer ol { padding-left: 18px; margin: 8px 0 0; }
+
+  @media (max-width: 860px) {
+    .tiles { grid-template-columns: repeat(2, 1fr); }
+    .grid2 { grid-template-columns: 1fr; }
+    .board { grid-template-columns: 64px repeat(3, 1fr) 72px; font-size: 11.5px; }
+    .howto { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <p class="eyebrow"><a href="index.html" style="color:inherit">&larr; Priors and Prejudice</a> &middot; Bayesian observer</p>
+    <h1>Block Belief Machine</h1>
+    <p class="lede">A simulated mouse watches a drifting grating each trial and licks left or right. It has to learn two things at once: which way this grating moves, and which kind of block it is living in. Move the world's knobs and the observer's knobs separately and watch both beliefs move.</p>
+  </header>
+
+  <section class="tiles" aria-label="Summary of the current run">
+    <div class="tile">
+      <p class="lbl">What's my env &middot; block belief</p>
+      <div id="t-env">&middot;</div>
+      <div class="sub" id="t-env-sub">&middot;</div>
+      <div class="envbar" aria-hidden="true"><i class="r" id="eb-r"></i><i class="u" id="eb-u"></i><i class="l" id="eb-l"></i></div>
+    </div>
+    <div class="tile">
+      <p class="lbl">Trials to 90% block belief</p>
+      <div class="val" id="t-t90">&middot;</div>
+      <div class="sub" id="t-t90-sub">&middot;</div>
+    </div>
+    <div class="tile">
+      <p class="lbl">Accuracy</p>
+      <div class="val" id="t-acc">&middot;</div>
+      <div class="sub" id="t-acc-sub">&middot;</div>
+    </div>
+    <div class="tile">
+      <p class="lbl">Choice bias</p>
+      <div class="val" id="t-bias">&middot;</div>
+      <div class="sub" id="t-bias-sub">&middot;</div>
+    </div>
+  </section>
+
+  <div class="grid2">
+    <div>
+      <div class="panel world" aria-label="World controls">
+        <h2>World <span class="hint">generative side</span></h2>
+
+        <div class="ctrl">
+          <div class="row"><label for="s-pr">Block bias &middot; P(stimulus is right)</label><span class="rdval mono" id="v-pr">80%</span></div>
+          <input type="range" class="bias" id="s-pr" min="1" max="99" value="80" step="1">
+          <div class="biasfill" title="Share of left vs right trials"><div class="l" id="fill-l" style="width:20%"></div><div class="r"></div></div>
+          <div class="seg full" role="group" aria-label="Block presets" style="margin-top:9px">
+            <button data-pr="20">20 / 80</button><button data-pr="50">50 / 50</button><button data-pr="80" class="on">80 / 20</button>
+          </div>
+        </div>
+
+        <div class="ctrl">
+          <div class="row"><label for="s-n">Trials</label><span class="rdval mono" id="v-n">40</span></div>
+          <input type="range" id="s-n" min="5" max="200" value="40" step="1">
+        </div>
+
+        <div class="ctrl">
+          <div class="row"><label for="s-c">Contrast</label><span class="rdval mono" id="v-c">0.125</span></div>
+          <div class="seg full" role="group" aria-label="Contrast mode" style="margin-bottom:9px">
+            <button id="cm-fixed" class="on">One fixed level</button><button id="cm-table">Lab table</button>
+          </div>
+          <input type="range" id="s-c" min="0" max="1" value="0.125" step="0.0125">
+          <div class="note" id="c-note">Every trial uses this contrast. Slide it to see what weak and strong evidence do.</div>
+        </div>
+
+        <div class="ctrl">
+          <div class="row"><label for="s-z">Sensory noise &zeta;</label><span class="rdval mono" id="v-z">1.00</span></div>
+          <input type="range" id="s-z" min="0.05" max="2" value="1" step="0.05">
+          <div class="note">The observation is <span class="mono">m = stim &times; contrast + &zeta; &times; noise</span>. What matters is contrast &divide; &zeta;.</div>
+        </div>
+
+        <div class="ctrl">
+          <label class="check"><input type="checkbox" id="sw-on"> Switch block mid-run</label>
+          <div id="sw-body" hidden>
+            <div class="row" style="margin-top:10px"><label for="s-swat">New block starts at trial</label><span class="rdval mono" id="v-swat">20</span></div>
+            <input type="range" id="s-swat" min="2" max="40" value="20" step="1">
+            <div class="row" style="margin-top:10px"><label for="s-pr2">New block bias &middot; P(right)</label><span class="rdval mono" id="v-pr2">20%</span></div>
+            <input type="range" class="bias" id="s-pr2" min="1" max="99" value="20" step="1">
+            <div class="note">The observer is not told. Watch how many trials the block belief takes to flip.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel observer" aria-label="Observer controls">
+        <h2>Observer <span class="hint">inference side</span></h2>
+        <div class="ctrl">
+          <div class="row"><label for="s-b">&beta; &middot; how biased it assumes a biased block is</label><span class="rdval mono" id="v-b">0.80</span></div>
+          <input type="range" id="s-b" min="0.5" max="0.99" value="0.8" step="0.01">
+          <div class="seg full" role="group" aria-label="Beta presets" style="margin-top:9px">
+            <button data-b="0.8" class="on">&beta; = 0.80</button><button data-b="0.55">&beta; = 0.55</button>
+          </div>
+          <div class="note">Block likelihoods: P(right | R-biased) = &beta;, P(right | unbiased) = 0.5, P(right | L-biased) = 1 &minus; &beta;. Block prior starts flat at 1/3 each.</div>
+        </div>
+        <div class="ctrl">
+          <div class="note">The observer shares the world's &zeta; and uses &sigma; = <span class="mono" id="v-sigma">0.49</span>, the spread of the nine signed contrast levels, as its contrast prior. Both fixed, as in the task design.</div>
+        </div>
+      </div>
+
+      <div class="panel" aria-label="Run controls">
+        <h2>Run</h2>
+        <div class="ctrl">
+          <label class="check"><input type="checkbox" id="avg-on"> Average over 500 runs</label>
+          <div class="note">One run is noisy. Averages show what a parameter does on purpose.</div>
+        </div>
+        <div class="ctrl">
+          <button class="btn" id="redraw">&#8635; Draw a new sample</button>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="howto" aria-label="Reading order">
+        <div><b>1 &middot; The world makes a trial</b>It picks a direction and a contrast, then adds noise. First graph.</div>
+        <div><b>2 &middot; Which block am I in?</b>After each trial the mouse updates its belief about the block. Second graph.</div>
+        <div><b>3 &middot; Which way, this trial?</b>Before looking it expects one side. After looking it decides, then licks. Third graph.</div>
+        <div><b>4 &middot; One trial as a grid</b>The same numbers for a single trial, with the two sums.</div>
+      </div>
+      <div class="teach" id="teach"></div>
+
+      <div class="panel">
+        <h2>What the mouse saw <span class="hint">stimulus &times; contrast, and the noisy observation</span></h2>
+        <div class="chart" id="c-stream"></div>
+        <div class="legend">
+          <span><i style="background:var(--right)"></i>Filled dot = the truth, grating moved right</span>
+          <span><i style="background:var(--left)"></i>Filled dot = the truth, grating moved left</span>
+          <span><i class="ring"></i>Hollow ring = what the mouse saw, m</span>
+        </div>
+        <p class="caption"><b>How to read it.</b> Each column is one trial. The dot's height is the contrast, how strong the motion was. The ring is the dot plus noise, and the thin line between them is the noise. Above the zero line looks like right, below looks like left. The mouse only ever gets the ring.</p>
+      </div>
+
+      <div class="panel">
+        <h2>What's my env <span class="hint">block belief after each trial</span></h2>
+        <div class="chart" id="c-block"></div>
+        <div class="legend">
+          <span><i class="line" style="border-color:var(--right)"></i>P(I am in an R-biased block)</span>
+          <span><i class="dash" style="border-color:var(--unb)"></i>P(I am in an unbiased block)</span>
+          <span><i class="line" style="border-color:var(--left)"></i>P(I am in an L-biased block)</span>
+          <span id="lg-block-avg" hidden><i class="line" style="border-color:var(--faint);opacity:.5"></i>faint = this one sample, solid = mean of 500</span>
+        </div>
+        <p class="caption"><b>How to read it.</b> Three lines, one per kind of block the mouse might be in. Height is how sure the mouse is after that trial, from 0% to 100%, and the three always add up to 100%. Trial 0 is before any evidence, all three at 33%. The line that climbs is the block it believes in. Crossing the 90% line is "sure enough," and the tile at the top counts how many trials that took.</p>
+      </div>
+
+      <div class="panel">
+        <h2 id="h-dir">What's the current direction <span class="hint">P(right) before and after looking</span></h2>
+        <div class="chart" id="c-dir"></div>
+        <div class="legend" id="lg-dir">
+          <span><i class="line" style="border-color:var(--muted);opacity:.7"></i>Gray = prior &pi;, P(right) before looking, straight from the block belief</span>
+          <span><i class="line" style="border-color:var(--right)"></i>Teal = posterior, P(right) after seeing m</span>
+        </div>
+        <p class="caption" id="cap-dir"><b>How to read it.</b> Both lines answer "how likely is it that this trial's grating moved right." Gray is the expectation before looking, which is just the block belief from the graph above turned into a lean. Teal is after seeing m. Above 50% the mouse licks right, below 50% it licks left. Teal hugging gray means the mouse is trusting the block; teal jumping away from gray means the observation won.</p>
+        <div class="legend" id="lg-acc" hidden>
+          <span><i class="line" style="border-color:var(--acc)"></i>Mean accuracy at each trial, 500 runs</span>
+        </div>
+        <p class="caption" id="cap-acc" hidden><b>How to read it.</b> Averaged over 500 runs: the share of runs where the lick on that trial was correct. Chance is 50%. It climbs as the block belief sharpens and the prior starts helping on faint trials.</p>
+        <div class="chart" id="c-choice" style="margin-top:10px"></div>
+        <div class="legend" id="lg-choice">
+          <span><i style="background:var(--ok)"></i>Correct lick</span>
+          <span><i style="background:var(--warn)"></i>Wrong lick</span>
+          <span style="color:var(--faint)">top row = licked right, bottom row = licked left</span>
+        </div>
+        <p class="caption"><b>Licks.</b> One dot per trial. Top row it licked right, bottom row it licked left. Green means that lick matched the true direction, amber means it did not.</p>
+      </div>
+
+      <div class="panel">
+        <h2>One trial as a grid <span class="hint">joint posterior for one trial</span></h2>
+        <div class="ctrl" style="margin-bottom:14px">
+          <div class="row"><label for="s-insp">Inspect trial</label><span class="rdval mono" id="v-insp">40</span></div>
+          <input type="range" id="s-insp" min="1" max="40" value="40" step="1">
+          <div class="note">Hovering any chart above also moves this.</div>
+        </div>
+        <div class="board" id="board"></div>
+        <p class="boardnote" id="boardnote"></p>
+      </div>
+
+      <details class="data">
+        <summary>Show the numbers (table)</summary>
+        <div class="tablewrap">
+          <table id="datatable">
+            <thead><tr><th>Trial</th><th>Stimulus</th><th class="mono">Contrast</th><th class="mono">m</th><th class="mono">&pi; P(right)</th><th class="mono">P(right | m)</th><th>Lick</th><th class="mono">P(R-biased)</th><th class="mono">P(unbiased)</th><th class="mono">P(L-biased)</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <footer>
+    Ideal-observer model by Alyssa Romportl (Eissa and Felsen labs, University of Colorado Anschutz), built as an interactive by Raven Spellman for the ABRCMS 2026 poster <em>Priors and Prejudice</em>. A simulation for building intuition, no animal data involved. The five steps, per trial:
+    <ol>
+      <li>Block belief before the trial (flat 1/3 each on trial 1, then last trial's posterior).</li>
+      <li>Prior for right: &pi; = &beta;&middot;P(R-biased) + 0.5&middot;P(unbiased) + (1 &minus; &beta;)&middot;P(L-biased).</li>
+      <li>Observation m drawn from Normal(stimulus &times; contrast, &zeta;&sup2;). Contrast is either the fixed level or drawn from the lab table (0, 0.0625, 0.125, 0.25, 1 with probabilities 0.1, 0.3, 0.3, 0.2, 0.1).</li>
+      <li>Likelihood of right = &Phi;(&mu;* / &sigma;*) with &mu;* = &zeta;<sup>&minus;2</sup>m / (&sigma;<sup>&minus;2</sup> + &zeta;<sup>&minus;2</sup>) and &sigma;* = (&sigma;<sup>&minus;2</sup> + &zeta;<sup>&minus;2</sup>)<sup>&minus;1/2</sup>; posterior by Bayes' rule with &pi;.</li>
+      <li>Lick the side with the larger posterior (LLR sign). Then, after feedback, update the block belief with the true stimulus using &beta;, 0.5, 1 &minus; &beta;.</li>
+    </ol>
+  </footer>
+</div>
+<div class="tooltip" id="tip"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---- model constants ----
+  var C_SIGNED = [-1, -0.25, -0.125, -0.0625, 0, 0.0625, 0.125, 0.25, 1];
+  var SIGMA = Math.sqrt(C_SIGNED.reduce(function (s, c) { return s + c * c / 9; }, 0));
+  var C_LEVELS = [0, 0.0625, 0.125, 0.25, 1];
+  var C_PROBS = [0.1, 0.3, 0.3, 0.2, 0.1];
+  var N_RUNS = 500;
+
+  // ---- state ----
+  var st = {
+    pRight: 0.80, n: 40, cMode: "fixed", cFixed: 0.125, zeta: 1.0,
+    switchOn: false, switchAt: 20, pRight2: 0.20,
+    beta: 0.80, avg: false, inspect: 40, seed: 20260901
+  };
+  var hoverIdx = null;
+
+  // ---- deterministic RNG so a sample holds still until you redraw ----
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = a + 0x6D2B79F5 | 0;
+      var t = Math.imul(a ^ a >>> 15, 1 | a);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+  function makeGauss(rng) {
+    return function () {
+      var u = 1 - rng(), v = rng();
+      return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+    };
+  }
+  function erf(x) {
+    var s = x < 0 ? -1 : 1; x = Math.abs(x);
+    var t = 1 / (1 + 0.3275911 * x);
+    var y = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-x * x);
+    return s * y;
+  }
+  function Phi(z) { return 0.5 * (1 + erf(z / Math.SQRT2)); }
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+
+  function pickContrast(rng) {
+    var r = rng(), acc = 0;
+    for (var i = 0; i < C_LEVELS.length; i++) { acc += C_PROBS[i]; if (r < acc) return C_LEVELS[i]; }
+    return C_LEVELS[C_LEVELS.length - 1];
+  }
+  function trueBlock(pR) { return pR > 0.5 ? 0 : (pR < 0.5 ? 2 : 1); }
+  function pRightAt(t) { return (st.switchOn && t >= st.switchAt - 1) ? st.pRight2 : st.pRight; } // t is 0-indexed
+
+  // ---- generative side: the world makes one trial ----
+  function generateTrial(rng, gauss, pR) {
+    var stim = rng() < pR ? 1 : -1;
+    var c = st.cMode === "fixed" ? st.cFixed : pickContrast(rng);
+    var m = stim * c + st.zeta * gauss();
+    return { stim: stim, c: c, m: m };
+  }
+
+  // ---- observer side: infer direction from m and the block belief ----
+  function observeDirection(m, pb) {
+    var pi = st.beta * pb[0] + 0.5 * pb[1] + (1 - st.beta) * pb[2];
+    var z2 = Math.pow(st.zeta, -2), s2 = Math.pow(SIGMA, -2);
+    var muStar = (z2 * m) / (s2 + z2);
+    var sigStar = Math.sqrt(1 / (s2 + z2));
+    var LR = Phi(muStar / sigStar), LL = 1 - LR;
+    var uR = LR * pi, uL = LL * (1 - pi);
+    var postR = uR / (uR + uL);
+    return { pi: pi, LR: LR, LL: LL, postR: postR };
+  }
+  // ---- observer side: update the block belief with the true stimulus (feedback) ----
+  function updateBlock(stim, pb) {
+    var lb = stim === 1 ? [st.beta, 0.5, 1 - st.beta] : [1 - st.beta, 0.5, st.beta];
+    var u = [lb[0] * pb[0], lb[1] * pb[1], lb[2] * pb[2]];
+    var Z = u[0] + u[1] + u[2];
+    return [u[0] / Z, u[1] / Z, u[2] / Z];
+  }
+
+  function simulate(seed) {
+    var rng = mulberry32(seed), gauss = makeGauss(rng);
+    var pb = [1 / 3, 1 / 3, 1 / 3];
+    var out = { stim: [], c: [], m: [], pi: [], postR: [], choice: [], correct: [], PB: [pb.slice()] };
+    for (var t = 0; t < st.n; t++) {
+      var w = generateTrial(rng, gauss, pRightAt(t));
+      var o = observeDirection(w.m, pb);
+      var pr = clamp(o.postR, 1e-12, 1 - 1e-12);
+      var llr = Math.log(pr / (1 - pr));
+      var ch = llr > 1e-9 ? 1 : (llr < -1e-9 ? -1 : (rng() < 0.5 ? 1 : -1));
+      out.stim.push(w.stim); out.c.push(w.c); out.m.push(w.m);
+      out.pi.push(o.pi); out.postR.push(o.postR); out.choice.push(ch); out.correct.push(ch === w.stim ? 1 : 0);
+      pb = updateBlock(w.stim, pb);
+      out.PB.push(pb.slice());
+    }
+    return out;
+  }
+
+  // trials until P(true block) >= 0.9, counted from the block's first trial (1-indexed start)
+  function trialsTo90(PB, blockIdx, startTrial) {
+    for (var k = startTrial; k <= st.n; k++) if (PB[k][blockIdx] >= 0.9) return k - startTrial + 1;
+    return null;
+  }
+  function t90ForRun(sim) {
+    if (st.switchOn) return trialsTo90(sim.PB, trueBlock(st.pRight2), st.switchAt);
+    return trialsTo90(sim.PB, trueBlock(st.pRight), 1);
+  }
+
+  function simulateMany() {
+    var meanPB = [], meanAcc = [], meanCR = [], t90s = [], reached = 0;
+    for (var k = 0; k <= st.n; k++) meanPB.push([0, 0, 0]);
+    for (var t = 0; t < st.n; t++) { meanAcc.push(0); meanCR.push(0); }
+    for (var r = 0; r < N_RUNS; r++) {
+      var sim = simulate((st.seed + r * 7919) >>> 0);
+      for (var k2 = 0; k2 <= st.n; k2++) { meanPB[k2][0] += sim.PB[k2][0]; meanPB[k2][1] += sim.PB[k2][1]; meanPB[k2][2] += sim.PB[k2][2]; }
+      for (var t2 = 0; t2 < st.n; t2++) { meanAcc[t2] += sim.correct[t2]; meanCR[t2] += (sim.choice[t2] === 1 ? 1 : 0); }
+      var t90 = t90ForRun(sim);
+      if (t90 !== null) { t90s.push(t90); reached++; }
+    }
+    for (var k3 = 0; k3 <= st.n; k3++) { meanPB[k3][0] /= N_RUNS; meanPB[k3][1] /= N_RUNS; meanPB[k3][2] /= N_RUNS; }
+    for (var t3 = 0; t3 < st.n; t3++) { meanAcc[t3] /= N_RUNS; meanCR[t3] /= N_RUNS; }
+    t90s.sort(function (a, b) { return a - b; });
+    var median = t90s.length ? t90s[Math.floor(t90s.length / 2)] : null;
+    var mean = t90s.length ? t90s.reduce(function (a, b) { return a + b; }, 0) / t90s.length : null;
+    return { meanPB: meanPB, meanAcc: meanAcc, meanCR: meanCR, t90mean: mean, t90median: median, reachedFrac: reached / N_RUNS };
+  }
+
+  // ---- SVG helpers ----
+  var NS = "http://www.w3.org/2000/svg";
+  var W = 760, ML = 46, MR = 98;
+  function axisTitles(svg, H, yTitle, top, bot) {
+    var xt = el("text", { x: ML + (W - ML - MR) / 2, y: H - 4, "text-anchor": "middle", class: "ytitle" });
+    xt.textContent = "trial number"; svg.appendChild(xt);
+    if (yTitle) {
+      var mid = (top + bot) / 2;
+      var yt = el("text", { x: 11, y: mid, "text-anchor": "middle", class: "ytitle", transform: "rotate(-90 11 " + mid + ")" });
+      yt.textContent = yTitle; svg.appendChild(yt);
+    }
+  }
+  function el(tag, attrs) {
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+  function xScale(i) { return ML + (st.n <= 0 ? 0 : i / st.n) * (W - ML - MR); }
+  function xTicks() {
+    var step = st.n <= 10 ? 1 : (st.n <= 40 ? 5 : (st.n <= 100 ? 10 : 25));
+    var t = [];
+    for (var i = 0; i <= st.n; i += step) t.push(i);
+    if (t[t.length - 1] !== st.n) t.push(st.n);
+    return t;
+  }
+  var charts = {};
+
+  function addCrosshair(svg, id, top, bot) {
+    var cross = el("line", { x1: 0, y1: top, x2: 0, y2: bot, stroke: "var(--accent)", "stroke-width": 1, opacity: 0 });
+    svg.appendChild(cross);
+    var overlay = el("rect", { x: ML, y: 0, width: W - ML - MR, height: svg.viewBox.baseVal.height, fill: "transparent", style: "cursor:crosshair" });
+    svg.appendChild(overlay);
+    overlay.addEventListener("pointermove", function (e) { onMove(e, svg); });
+    overlay.addEventListener("pointerleave", hideHover);
+    charts[id] = { svg: svg, cross: cross, hots: [] };
+  }
+  function addSwitchMark(svg, top, bot) {
+    if (!st.switchOn) return;
+    var x = xScale(st.switchAt - 1);
+    svg.appendChild(el("line", { x1: x, y1: top, x2: x, y2: bot, stroke: "var(--faint)", "stroke-width": 1 }));
+    var lab = el("text", { x: x + 4, y: top + 9, class: "clab" });
+    lab.textContent = "switch";
+    svg.appendChild(lab);
+  }
+
+  // stimulus x contrast dots, plus observation rings
+  function drawStream(sim) {
+    var H = 150, host = document.getElementById("c-stream");
+    host.innerHTML = "";
+    var svg = el("svg", { viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": "Signed contrast of each stimulus and the noisy observation" });
+    var top = 12, bot = H - 38;
+    var maxAbs = 1;
+    for (var i = 0; i < sim.m.length; i++) maxAbs = Math.max(maxAbs, Math.abs(sim.m[i]));
+    maxAbs = Math.min(maxAbs, 3.2);
+    function y(v) { return bot - (clamp(v, -maxAbs, maxAbs) + maxAbs) / (2 * maxAbs) * (bot - top); }
+    svg.appendChild(el("rect", { x: ML, y: top, width: W - ML - MR, height: y(0) - top, fill: "var(--right)", opacity: 0.06 }));
+    svg.appendChild(el("rect", { x: ML, y: y(0), width: W - ML - MR, height: bot - y(0), fill: "var(--left)", opacity: 0.06 }));
+    var b1 = el("text", { x: ML + 6, y: top + 11, class: "band" }); b1.textContent = "looks like right"; svg.appendChild(b1);
+    var b2 = el("text", { x: ML + 6, y: bot - 4, class: "band" }); b2.textContent = "looks like left"; svg.appendChild(b2);
+    [maxAbs, 0, -maxAbs].forEach(function (v) {
+      svg.appendChild(el("line", { x1: ML, y1: y(v), x2: W - MR, y2: y(v), stroke: "var(--grid)", "stroke-width": 1 }));
+      var lab = el("text", { x: ML - 8, y: y(v) + 3.5, "text-anchor": "end", class: "clab" });
+      lab.textContent = (v > 0 ? "+" : "") + v.toFixed(1);
+      svg.appendChild(lab);
+    });
+    var tl = el("text", { x: W - MR + 8, y: y(0) + 3.5, class: "cend" }); tl.textContent = "0 = no lean"; svg.appendChild(tl);
+    axisTitles(svg, H, "what the mouse saw, m", top, bot);
+    addSwitchMark(svg, top, bot);
+    for (var t = 0; t < sim.stim.length; t++) {
+      var x = xScale(t + 1);
+      svg.appendChild(el("line", { x1: x, y1: y(sim.stim[t] * sim.c[t]), x2: x, y2: y(sim.m[t]), stroke: "var(--hair-strong)", "stroke-width": 1 }));
+      svg.appendChild(el("circle", { cx: x, cy: y(sim.m[t]), r: 3.5, fill: "var(--card)", stroke: "var(--muted)", "stroke-width": 1.5 }));
+      svg.appendChild(el("circle", { cx: x, cy: y(sim.stim[t] * sim.c[t]), r: 4, fill: sim.stim[t] === 1 ? "var(--right)" : "var(--left)", stroke: "var(--card)", "stroke-width": 1.5 }));
+    }
+    xTicks().forEach(function (tk) {
+      var lab = el("text", { x: xScale(tk), y: bot + 14, "text-anchor": "middle", class: "clab" });
+      lab.textContent = tk; svg.appendChild(lab);
+    });
+    addCrosshair(svg, "c-stream", top, bot);
+    host.appendChild(svg);
+  }
+
+  // multi-series line chart on a 0..1 axis
+  function drawLines(hostId, series, opts) {
+    var H = opts.height || 190, host = document.getElementById(hostId);
+    host.innerHTML = "";
+    var svg = el("svg", { viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": opts.aria });
+    var top = 14, bot = H - 40;
+    function y(v) { return bot - clamp(v, 0, 1) * (bot - top); }
+    if (opts.bands) {
+      svg.appendChild(el("rect", { x: ML, y: top, width: W - ML - MR, height: y(opts.hline) - top, fill: "var(--right)", opacity: 0.06 }));
+      svg.appendChild(el("rect", { x: ML, y: y(opts.hline), width: W - ML - MR, height: bot - y(opts.hline), fill: "var(--left)", opacity: 0.06 }));
+      var b1 = el("text", { x: ML + 6, y: top + 11, class: "band" }); b1.textContent = opts.bands[0]; svg.appendChild(b1);
+      var b2 = el("text", { x: ML + 6, y: bot - 4, class: "band" }); b2.textContent = opts.bands[1]; svg.appendChild(b2);
+    }
+    axisTitles(svg, H, opts.yTitle, top, bot);
+    [1, 0.5, 0].forEach(function (v) {
+      svg.appendChild(el("line", { x1: ML, y1: y(v), x2: W - MR, y2: y(v), stroke: "var(--grid)", "stroke-width": 1 }));
+      var lab = el("text", { x: ML - 8, y: y(v) + 3.5, "text-anchor": "end", class: "clab" });
+      lab.textContent = Math.round(v * 100) + "%"; svg.appendChild(lab);
+    });
+    if (opts.hline !== undefined) {
+      svg.appendChild(el("line", { x1: ML, y1: y(opts.hline), x2: W - MR, y2: y(opts.hline), stroke: "var(--hair-strong)", "stroke-width": 1 }));
+      var hl = el("text", { x: ML + 4, y: y(opts.hline) - 4, class: "clab" });
+      hl.textContent = opts.hlineLabel; svg.appendChild(hl);
+    }
+    addSwitchMark(svg, top, bot);
+    var hots = [];
+    series.forEach(function (s) {
+      var pts = s.vals.map(function (v, i) { return xScale(i + (s.x0 || 0)) + "," + y(v); }).join(" ");
+      var attrs = { points: pts, fill: "none", stroke: s.color, "stroke-width": s.width || 2, "stroke-linejoin": "round", "stroke-linecap": "round", opacity: s.opacity === undefined ? 1 : s.opacity };
+      if (s.dash) attrs["stroke-dasharray"] = s.dash;
+      svg.appendChild(el("polyline", attrs));
+      if (!s.faint) {
+        var lastI = s.vals.length - 1 + (s.x0 || 0), lastV = s.vals[s.vals.length - 1];
+        svg.appendChild(el("circle", { cx: xScale(lastI), cy: y(lastV), r: 4, fill: s.color, stroke: "var(--card)", "stroke-width": 2 }));
+        if (s.label) {
+          var lab = el("text", { x: W - MR + 8, y: y(lastV) + 3.5, class: "cend" });
+          lab.textContent = s.label; svg.appendChild(lab);
+        }
+        var hot = el("circle", { cx: 0, cy: 0, r: 4.5, fill: s.color, stroke: "var(--card)", "stroke-width": 2, opacity: 0 });
+        svg.appendChild(hot);
+        hots.push({ el: hot, series: s, y: y });
+      }
+    });
+    xTicks().forEach(function (tk) {
+      var lab = el("text", { x: xScale(tk), y: bot + 14, "text-anchor": "middle", class: "clab" });
+      lab.textContent = tk; svg.appendChild(lab);
+    });
+    addCrosshair(svg, hostId, top, bot);
+    charts[hostId].hots = hots;
+    host.appendChild(svg);
+    // nudge colliding end labels apart
+    var labels = Array.prototype.slice.call(svg.querySelectorAll("text.cend")).sort(function (a, b) { return +a.getAttribute("y") - +b.getAttribute("y"); });
+    for (var i = 1; i < labels.length; i++) {
+      var prev = +labels[i - 1].getAttribute("y"), cur = +labels[i].getAttribute("y");
+      if (cur - prev < 11) labels[i].setAttribute("y", prev + 11);
+    }
+  }
+
+  function drawChoices(sim) {
+    var H = 62, host = document.getElementById("c-choice");
+    host.innerHTML = "";
+    var svg = el("svg", { viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": "Lick on each trial, marked correct or wrong" });
+    var yR = 16, yL = 40;
+    [yR, yL].forEach(function (yy, k) {
+      svg.appendChild(el("line", { x1: ML, y1: yy, x2: W - MR, y2: yy, stroke: "var(--grid)", "stroke-width": 1 }));
+      var lab = el("text", { x: ML - 8, y: yy + 3.5, "text-anchor": "end", class: "clab" });
+      lab.textContent = k === 0 ? "R" : "L"; svg.appendChild(lab);
+    });
+    addSwitchMark(svg, 6, 50);
+    for (var t = 0; t < sim.choice.length; t++) {
+      svg.appendChild(el("circle", { cx: xScale(t + 1), cy: sim.choice[t] === 1 ? yR : yL, r: 4, fill: sim.correct[t] ? "var(--ok)" : "var(--warn)", stroke: "var(--card)", "stroke-width": 1.5 }));
+    }
+    addCrosshair(svg, "c-choice", 6, 50);
+    host.appendChild(svg);
+  }
+
+  // ---- hover ----
+  var lastSim = null, lastAvg = null;
+  function onMove(e, svg) {
+    var rect = svg.getBoundingClientRect();
+    var localX = (e.clientX - rect.left) / rect.width * W;
+    var frac = (localX - ML) / (W - ML - MR);
+    var i = Math.round(clamp(frac, 0, 1) * st.n);
+    hoverIdx = Math.max(1, i);
+    setHover(hoverIdx, e.clientX, e.clientY);
+  }
+  function setHover(i, cx, cy) {
+    var x = xScale(i);
+    for (var id in charts) {
+      var c = charts[id];
+      c.cross.setAttribute("x1", x); c.cross.setAttribute("x2", x); c.cross.setAttribute("opacity", 1);
+      c.hots.forEach(function (h) {
+        var idx = i - (h.series.x0 || 0);
+        if (idx < 0 || idx >= h.series.vals.length) { h.el.setAttribute("opacity", 0); return; }
+        h.el.setAttribute("cx", x); h.el.setAttribute("cy", h.y(h.series.vals[idx])); h.el.setAttribute("opacity", 1);
+      });
+    }
+    renderBoard(i);
+    document.getElementById("v-insp").textContent = i;
+    document.getElementById("s-insp").value = i;
+    var tip = document.getElementById("tip");
+    tip.innerHTML = "";
+    tip.appendChild(tooltipContent(i));
+    tip.style.opacity = 1;
+    var tw = tip.offsetWidth, th = tip.offsetHeight;
+    var px = cx + 14; if (px + tw > window.innerWidth - 8) px = cx - tw - 14;
+    var py = cy - th - 10; if (py < 8) py = cy + 16;
+    tip.style.left = px + "px"; tip.style.top = py + "px";
+  }
+  function hideHover() {
+    hoverIdx = null;
+    for (var id in charts) {
+      charts[id].cross.setAttribute("opacity", 0);
+      charts[id].hots.forEach(function (h) { h.el.setAttribute("opacity", 0); });
+    }
+    document.getElementById("tip").style.opacity = 0;
+    document.getElementById("v-insp").textContent = st.inspect;
+    document.getElementById("s-insp").value = st.inspect;
+    renderBoard(st.inspect);
+  }
+  function row(tip, key, val, color, dash) {
+    var r = document.createElement("div"); r.className = "tt-r";
+    var k = document.createElement("span"); k.className = "k";
+    if (color) { var i = document.createElement("i"); i.style.borderColor = color; if (dash) i.style.borderTopStyle = "dashed"; k.appendChild(i); }
+    k.appendChild(document.createTextNode(key));
+    var v = document.createElement("span"); v.className = "v"; v.textContent = val;
+    r.appendChild(k); r.appendChild(v); tip.appendChild(r);
+  }
+  function pct(v) { return (v * 100).toFixed(1) + "%"; }
+  function tooltipContent(i) {
+    var frag = document.createDocumentFragment();
+    var h = document.createElement("div"); h.className = "tt-h";
+    var t = i - 1, sim = lastSim;
+    h.textContent = "Trial " + i + " \u00b7 true block: " + BLOCK_NAMES[trueBlock(pRightAt(t))];
+    frag.appendChild(h);
+    row(frag, "Stimulus", (sim.stim[t] === 1 ? "right" : "left") + " \u00b7 c = " + sim.c[t].toFixed(4), sim.stim[t] === 1 ? "var(--right)" : "var(--left)");
+    row(frag, "Observation m", (sim.m[t] >= 0 ? "+" : "") + sim.m[t].toFixed(3), "var(--muted)");
+    row(frag, "Prior \u03c0 P(right)", pct(sim.pi[t]), "var(--muted)");
+    row(frag, "Posterior P(right | m)", pct(sim.postR[t]), "var(--right)");
+    row(frag, "Lick", (sim.choice[t] === 1 ? "right" : "left") + (sim.correct[t] ? " \u2713" : " \u2715"), sim.correct[t] ? "var(--ok)" : "var(--warn)");
+    var hr = document.createElement("hr"); frag.appendChild(hr);
+    var pb = sim.PB[i];
+    row(frag, "R-biased after trial", pct(pb[0]), "var(--right)");
+    row(frag, "Unbiased after trial", pct(pb[1]), "var(--unb)", true);
+    row(frag, "L-biased after trial", pct(pb[2]), "var(--left)");
+    if (st.avg && lastAvg) {
+      var hr2 = document.createElement("hr"); frag.appendChild(hr2);
+      row(frag, "Mean accuracy, 500 runs", pct(lastAvg.meanAcc[t]), "var(--acc)");
+      row(frag, "Mean P(R-biased), 500 runs", pct(lastAvg.meanPB[i][0]), "var(--right)");
+    }
+    return frag;
+  }
+
+  // ---- joint grid ----
+  var BLOCK_NAMES = ["R-biased", "unbiased", "L-biased"];
+  function renderBoard(i) {
+    var sim = lastSim, t = i - 1;
+    var pb = sim.PB[t];                 // block belief before this trial
+    var o = observeDirection(sim.m[t], pb);
+    var pRb = [st.beta, 0.5, 1 - st.beta];
+    var J = [[0, 0, 0], [0, 0, 0]], Z = 0;
+    for (var b = 0; b < 3; b++) {
+      J[0][b] = o.LR * pRb[b] * pb[b];
+      J[1][b] = o.LL * (1 - pRb[b]) * pb[b];
+      Z += J[0][b] + J[1][b];
+    }
+    for (b = 0; b < 3; b++) { J[0][b] /= Z; J[1][b] /= Z; }
+    var rowSum = [J[0][0] + J[0][1] + J[0][2], J[1][0] + J[1][1] + J[1][2]];
+    var colSum = [J[0][0] + J[1][0], J[0][1] + J[1][1], J[0][2] + J[1][2]];
+
+    var board = document.getElementById("board");
+    board.innerHTML = "";
+    function add(cls, html) { var d = document.createElement("div"); d.className = cls; d.innerHTML = html; board.appendChild(d); return d; }
+    function cell(v, marg) {
+      var d = document.createElement("div"); d.className = "cell" + (marg ? " marg" : "");
+      var fill = document.createElement("i"); fill.style.opacity = (0.08 + 0.55 * v).toFixed(3);
+      var s = document.createElement("span"); s.textContent = pct(v);
+      d.appendChild(fill); d.appendChild(s); board.appendChild(d);
+    }
+    var bp = st.beta, bpct = Math.round(bp * 100), lpct = 100 - bpct;
+    add("corner", "trial " + i + "<br>m = " + (sim.m[t] >= 0 ? "+" : "") + sim.m[t].toFixed(2));
+    add("hd", "<b>R-biased</b>" + bpct + " / " + lpct);
+    add("hd", "<b>unbiased</b>50 / 50");
+    add("hd", "<b>L-biased</b>" + lpct + " / " + bpct);
+    add("hd", "<b>&rarr; sum</b>P(direction | m)");
+    add("rh", "<i style=\"background:var(--right)\"></i>trial is R");
+    cell(J[0][0]); cell(J[0][1]); cell(J[0][2]); cell(rowSum[0], true);
+    add("rh", "<i style=\"background:var(--left)\"></i>trial is L");
+    cell(J[1][0]); cell(J[1][1]); cell(J[1][2]); cell(rowSum[1], true);
+    add("arrow", "&darr; sum");
+    cell(colSum[0], true); cell(colSum[1], true); cell(colSum[2], true);
+    add("corner", "P(block | m)");
+
+    var note = document.getElementById("boardnote");
+    note.textContent = "Each cell is P(direction, block | m) for this trial, from the block belief carried in (" +
+      pct(pb[0]) + " R-biased, " + pct(pb[1]) + " unbiased, " + pct(pb[2]) + " L-biased). " +
+      "Summing across a row gives the direction posterior the model licks on: P(right | m) = " + pct(rowSum[0]) + ". " +
+      "Summing down a column is what the observation alone says about the block; the model then updates the block belief with the true stimulus after feedback (" +
+      (sim.stim[t] === 1 ? "right" : "left") + " here), landing at " + pct(sim.PB[i][0]) + " R-biased.";
+  }
+
+  // ---- teaching strip ----
+  function updateTeach() {
+    var teach = document.getElementById("teach");
+    var snrTxt, verdict;
+    if (st.cMode === "fixed") {
+      var snr = st.cFixed / st.zeta;
+      snrTxt = "At contrast " + st.cFixed.toFixed(4) + " with noise \u03b6 = " + st.zeta.toFixed(2) + ", the observation lands on average " + snr.toFixed(2) + " noise widths from zero.";
+      verdict = snr < 0.25 ? "That is weak evidence, so the prior from the block belief does most of the deciding and licks follow the block bias." :
+        (snr < 0.8 ? "That is middling evidence: prior and observation share the decision, which is where block bias shows up as a tilt in the errors." :
+          "That is strong evidence, so the observation overrides the prior and accuracy stays high whatever the block is.");
+    } else {
+      snrTxt = "Contrast is drawn from the lab table each trial: 10% of trials at 0 (pure guess from the prior), 60% at 0.0625 or 0.125, 20% at 0.25, 10% at 1.";
+      verdict = "With \u03b6 = " + st.zeta.toFixed(2) + ", most trials are weak evidence, so the block bias matters on most trials.";
+    }
+    var pRtxt = "The world's block is " + Math.round(st.pRight * 100) + "% right; the observer assumes a biased block is " + Math.round(st.beta * 100) + "% (\u03b2)" +
+      (Math.abs(st.pRight - st.beta) > 0.02 && Math.abs((1 - st.pRight) - st.beta) > 0.02 && st.pRight !== 0.5 ? ", so its picture of the block is off from the truth." : ".");
+    teach.innerHTML = "";
+    teach.appendChild(document.createTextNode(snrTxt + " " + verdict + " " + pRtxt));
+  }
+
+  // ---- tiles ----
+  function updateTiles(sim, avg) {
+    var last = sim.PB[st.n];
+    var win = last[0] >= last[1] && last[0] >= last[2] ? 0 : (last[1] >= last[2] ? 1 : 2);
+    var envEl = document.getElementById("t-env");
+    envEl.innerHTML = "";
+    var pill = document.createElement("span"); pill.className = "pill " + ["r", "u", "l"][win];
+    var dot = document.createElement("span"); dot.className = "dot"; dot.style.background = ["var(--right)", "var(--unb)", "var(--left)"][win];
+    pill.appendChild(dot); pill.appendChild(document.createTextNode(BLOCK_NAMES[win] + " \u00b7 " + pct(last[win])));
+    envEl.appendChild(pill);
+    var trueB = trueBlock(pRightAt(st.n - 1));
+    document.getElementById("t-env-sub").textContent = (win === trueB ? "matches the true block" : "true block is " + BLOCK_NAMES[trueB]) + " \u00b7 after trial " + st.n;
+    document.getElementById("eb-r").style.width = (last[0] * 100) + "%";
+    document.getElementById("eb-u").style.width = (last[1] * 100) + "%";
+    document.getElementById("eb-l").style.width = (last[2] * 100) + "%";
+
+    var t90 = t90ForRun(sim);
+    var from = st.switchOn ? "after the switch at trial " + st.switchAt : "from a flat start";
+    if (avg) {
+      document.getElementById("t-t90").textContent = avg.t90median === null ? "never" : avg.t90median + " median";
+      document.getElementById("t-t90-sub").textContent = avg.t90mean === null ? "no run reached 90% " + from : "mean " + avg.t90mean.toFixed(1) + " \u00b7 " + Math.round(avg.reachedFrac * 100) + "% of runs reached it " + from;
+    } else {
+      document.getElementById("t-t90").textContent = t90 === null ? "not yet" : t90 + " trials";
+      document.getElementById("t-t90-sub").textContent = (t90 === null ? "did not reach 90% within the run, " : "") + from;
+    }
+
+    var acc = sim.correct.reduce(function (a, b) { return a + b; }, 0) / st.n;
+    if (avg) {
+      var meanAcc = avg.meanAcc.reduce(function (a, b) { return a + b; }, 0) / st.n;
+      document.getElementById("t-acc").textContent = pct(meanAcc);
+      document.getElementById("t-acc-sub").textContent = "mean over 500 runs \u00b7 this sample " + pct(acc);
+    } else {
+      document.getElementById("t-acc").textContent = pct(acc);
+      document.getElementById("t-acc-sub").textContent = "correct licks in this sample";
+    }
+
+    var cr = sim.choice.filter(function (c) { return c === 1; }).length / st.n;
+    var sr = sim.stim.filter(function (s) { return s === 1; }).length / st.n;
+    if (avg) {
+      var mcr = avg.meanCR.reduce(function (a, b) { return a + b; }, 0) / st.n;
+      document.getElementById("t-bias").textContent = pct(mcr) + " right";
+      document.getElementById("t-bias-sub").textContent = "mean share of right licks \u00b7 world sends " + Math.round((st.switchOn ? (st.pRight * (st.switchAt - 1) + st.pRight2 * (st.n - st.switchAt + 1)) / st.n : st.pRight) * 100) + "% right";
+    } else {
+      document.getElementById("t-bias").textContent = pct(cr) + " right";
+      document.getElementById("t-bias-sub").textContent = "licks \u00b7 stimulus was right " + pct(sr) + " of trials";
+    }
+  }
+
+  function updateTable(sim) {
+    var tb = document.querySelector("#datatable tbody");
+    tb.innerHTML = "";
+    for (var t = 0; t < st.n; t++) {
+      var tr = document.createElement("tr");
+      var cells = [
+        [t + 1, "mono"], [sim.stim[t] === 1 ? "right" : "left", ""], [sim.c[t].toFixed(4), "mono"],
+        [(sim.m[t] >= 0 ? "+" : "") + sim.m[t].toFixed(3), "mono"], [pct(sim.pi[t]), "mono"], [pct(sim.postR[t]), "mono"],
+        [(sim.choice[t] === 1 ? "right" : "left") + (sim.correct[t] ? " \u2713" : " \u2715"), ""],
+        [pct(sim.PB[t + 1][0]), "mono"], [pct(sim.PB[t + 1][1]), "mono"], [pct(sim.PB[t + 1][2]), "mono"]
+      ];
+      cells.forEach(function (c) { var td = document.createElement("td"); td.className = c[1]; td.textContent = c[0]; tr.appendChild(td); });
+      tb.appendChild(tr);
+    }
+  }
+
+  // ---- master render ----
+  function render() {
+    var sim = simulate(st.seed);
+    lastSim = sim;
+    var avg = st.avg ? simulateMany() : null;
+    lastAvg = avg;
+    charts = {};
+
+    drawStream(sim);
+
+    var pbR = sim.PB.map(function (p) { return p[0]; }), pbU = sim.PB.map(function (p) { return p[1]; }), pbL = sim.PB.map(function (p) { return p[2]; });
+    var blockSeries;
+    if (avg) {
+      blockSeries = [
+        { vals: pbR, color: "var(--right)", width: 1.5, opacity: 0.3, faint: true },
+        { vals: pbU, color: "var(--unb)", width: 1.5, opacity: 0.3, faint: true, dash: "6 4" },
+        { vals: pbL, color: "var(--left)", width: 1.5, opacity: 0.3, faint: true },
+        { vals: avg.meanPB.map(function (p) { return p[0]; }), color: "var(--right)", label: "R-biased block" },
+        { vals: avg.meanPB.map(function (p) { return p[1]; }), color: "var(--unb)", dash: "6 4", label: "unbiased block" },
+        { vals: avg.meanPB.map(function (p) { return p[2]; }), color: "var(--left)", label: "L-biased block" }
+      ];
+    } else {
+      blockSeries = [
+        { vals: pbR, color: "var(--right)", label: "R-biased block" },
+        { vals: pbU, color: "var(--unb)", dash: "6 4", label: "unbiased block" },
+        { vals: pbL, color: "var(--left)", label: "L-biased block" }
+      ];
+    }
+    drawLines("c-block", blockSeries, { aria: "Posterior probability of each block type after each trial", hline: 0.9, hlineLabel: "90% = sure enough", yTitle: "how sure the mouse is" });
+    document.getElementById("lg-block-avg").hidden = !avg;
+
+    if (avg) {
+      drawLines("c-dir", [{ vals: avg.meanAcc, x0: 1, color: "var(--acc)", label: "mean accuracy" }], { aria: "Mean accuracy at each trial over 500 runs", hline: 0.5, hlineLabel: "50% = chance", yTitle: "share of correct licks" });
+      document.getElementById("h-dir").innerHTML = "Behavior <span class=\"hint\">mean accuracy at each trial, 500 runs</span>";
+    } else {
+      drawLines("c-dir", [
+        { vals: sim.pi, x0: 1, color: "var(--muted)", width: 1.5, opacity: 0.8, label: "before, \u03c0" },
+        { vals: sim.postR, x0: 1, color: "var(--right)", label: "after m" }
+      ], { aria: "Prior and posterior probability that the stimulus is right, each trial", hline: 0.5, hlineLabel: "50% = no lean", yTitle: "P(this trial is right)", bands: ["licks right", "licks left"] });
+      document.getElementById("h-dir").innerHTML = "What's the current direction <span class=\"hint\">P(right) before and after looking</span>";
+    }
+    document.getElementById("lg-dir").hidden = !!avg;
+    document.getElementById("cap-dir").hidden = !!avg;
+    document.getElementById("lg-acc").hidden = !avg;
+    document.getElementById("cap-acc").hidden = !avg;
+    drawChoices(sim);
+
+    updateTiles(sim, avg);
+    updateTable(sim);
+    var insp = document.getElementById("s-insp");
+    insp.max = st.n;
+    if (st.inspect > st.n) st.inspect = st.n;
+    insp.value = st.inspect;
+    document.getElementById("v-insp").textContent = st.inspect;
+    renderBoard(hoverIdx || st.inspect);
+  }
+
+  // ---- wire up controls ----
+  function $(id) { return document.getElementById(id); }
+  function setBiasButtons() {
+    Array.prototype.forEach.call(document.querySelectorAll("button[data-pr]"), function (b) {
+      b.classList.toggle("on", Math.round(st.pRight * 100) === +b.getAttribute("data-pr"));
+    });
+  }
+  function setBetaButtons() {
+    Array.prototype.forEach.call(document.querySelectorAll("button[data-b]"), function (b) {
+      b.classList.toggle("on", Math.abs(st.beta - +b.getAttribute("data-b")) < 1e-9);
+    });
+  }
+  $("s-pr").addEventListener("input", function () {
+    st.pRight = +this.value / 100;
+    $("v-pr").textContent = this.value + "%";
+    $("fill-l").style.width = (100 - this.value) + "%";
+    setBiasButtons(); updateTeach(); render();
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("button[data-pr]"), function (b) {
+    b.addEventListener("click", function () {
+      $("s-pr").value = b.getAttribute("data-pr");
+      $("s-pr").dispatchEvent(new Event("input"));
+    });
+  });
+  $("s-n").addEventListener("input", function () {
+    st.n = +this.value; $("v-n").textContent = this.value;
+    var sw = $("s-swat"); sw.max = st.n; if (st.switchAt > st.n) { st.switchAt = st.n; sw.value = st.n; $("v-swat").textContent = st.n; }
+    st.inspect = st.n;
+    render();
+  });
+  $("s-c").addEventListener("input", function () {
+    st.cFixed = +this.value; $("v-c").textContent = st.cFixed.toFixed(4);
+    updateTeach(); render();
+  });
+  function setCMode(mode) {
+    st.cMode = mode;
+    $("cm-fixed").classList.toggle("on", mode === "fixed");
+    $("cm-table").classList.toggle("on", mode === "table");
+    $("s-c").disabled = mode === "table";
+    $("v-c").textContent = mode === "table" ? "table" : st.cFixed.toFixed(4);
+    $("c-note").textContent = mode === "table"
+      ? "Each trial draws 0, 0.0625, 0.125, 0.25 or 1 with probabilities 0.1, 0.3, 0.3, 0.2, 0.1, as in the task design."
+      : "Every trial uses this contrast. Slide it to see what weak and strong evidence do.";
+    updateTeach(); render();
+  }
+  $("cm-fixed").addEventListener("click", function () { setCMode("fixed"); });
+  $("cm-table").addEventListener("click", function () { setCMode("table"); });
+  $("s-z").addEventListener("input", function () {
+    st.zeta = +this.value; $("v-z").textContent = st.zeta.toFixed(2);
+    updateTeach(); render();
+  });
+  $("sw-on").addEventListener("change", function () {
+    st.switchOn = this.checked; $("sw-body").hidden = !this.checked; render();
+  });
+  $("s-swat").addEventListener("input", function () {
+    st.switchAt = +this.value; $("v-swat").textContent = this.value; render();
+  });
+  $("s-pr2").addEventListener("input", function () {
+    st.pRight2 = +this.value / 100; $("v-pr2").textContent = this.value + "%"; render();
+  });
+  $("s-b").addEventListener("input", function () {
+    st.beta = +this.value; $("v-b").textContent = st.beta.toFixed(2);
+    setBetaButtons(); updateTeach(); render();
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("button[data-b]"), function (b) {
+    b.addEventListener("click", function () {
+      $("s-b").value = b.getAttribute("data-b");
+      $("s-b").dispatchEvent(new Event("input"));
+    });
+  });
+  $("avg-on").addEventListener("change", function () { st.avg = this.checked; render(); });
+  $("redraw").addEventListener("click", function () {
+    st.seed = (st.seed * 1664525 + 1013904223) >>> 0;
+    render();
+  });
+  $("s-insp").addEventListener("input", function () {
+    st.inspect = +this.value; $("v-insp").textContent = this.value;
+    if (!hoverIdx) renderBoard(st.inspect);
+  });
+  window.addEventListener("resize", function () { if (lastSim) render(); });
+
+  // ---- go ----
+  $("v-sigma").textContent = SIGMA.toFixed(2);
+  updateTeach();
+  render();
+})();
+</script>
+
+<!-- wetlab theme -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap">
+<style>
+/* ===== Wet Lab day room, liquid: Teal. Day only, to match the printed poster ===== */
+:root,:root:not([data-theme="light"]),:root[data-theme="dark"]{
+  --paper:#dde8ef; --card:#fdfefd; --ink:#0e2233; --muted:#3a5264; --faint:#5a6b78;
+  --hair:#d5dbe0; --hair-strong:#aeb6bd; --accent:#35a3a0; --accent-soft:rgba(53,163,160,.16);
+  --ok:#1f7a77; --warn:#b9313d; --grid:#dde5ea;
+  --right:#35a3a0; --left:#0e2233; --unb:#7f93a6; --acc:#1f7a77;
+  --right-soft:rgba(53,163,160,.16); --left-soft:rgba(14,34,51,.10); --unb-soft:rgba(127,147,166,.16);
+  --wall-a:#eef4f7; --wall-b:#dde8ef; --grout:rgba(110,145,165,.2); --line:#0e2233; --sheet-b:#f2f5f6;
+  --key:#0e2233; --on-key:#fdfefd;
+  --shadow:0 0 0 1px #aeb6bd,0 10px 24px rgba(14,34,51,.12);
+  color-scheme:light;
+}
+
+body{font-family:'Geist',system-ui,-apple-system,'Segoe UI',sans-serif;
+  background:linear-gradient(var(--grout) 1px,transparent 1px) 0 0/80px 80px,linear-gradient(90deg,var(--grout) 1px,transparent 1px) 0 0/80px 80px,linear-gradient(180deg,var(--wall-a),var(--wall-b)) fixed;
+  background-color:var(--paper)}
+.mono,.clab,.cend,.band,.tooltip .tt-h,.tooltip .tt-r .v,td.mono,th.mono,.board .cell>span{font-family:'Geist Mono',ui-monospace,Menlo,monospace}
+.eyebrow{font-family:'Geist Mono',ui-monospace,monospace;color:var(--muted);letter-spacing:.3em}
+.eyebrow a{text-decoration:none;border-bottom:1.5px solid var(--accent)}
+h1{font-family:'Geist',system-ui,sans-serif;font-weight:700;letter-spacing:-.04em;font-size:clamp(32px,6vw,52px);line-height:1}
+.lede{font-size:15.5px}
+header.top::after{content:"";display:block;height:14px;margin-top:22px;border-radius:4px;
+  background:radial-gradient(circle,rgba(255,255,255,.18) 0 1px,transparent 1.6px) 0 0/6px 6px,linear-gradient(180deg,#8d9aa4,#5c6973 45%,#353f48);box-shadow:0 10px 14px -6px rgba(14,34,51,.35)}
+
+/* enamel sheets with the navy inner line */
+.panel,.tile{position:relative;border:0;border-radius:16px;background:linear-gradient(180deg,var(--card),var(--sheet-b));box-shadow:var(--shadow)}
+.panel::before,.tile::before{content:"";position:absolute;inset:7px;border:1.5px solid var(--line);border-radius:10px;pointer-events:none;opacity:.9}
+.panel{padding:22px 20px}
+.tile{padding:16px 17px}
+.panel>*,.tile>*{position:relative}
+.panel h2{display:inline-flex;font-family:'Geist',sans-serif;font-weight:600;letter-spacing:.16em;color:var(--ink);font-size:12px}
+.panel.world h2,.panel.observer h2{color:var(--ink)}
+.panel h2 .hint{letter-spacing:0}
+.tile .lbl{font-family:'Geist Mono',monospace;letter-spacing:.12em;color:var(--muted)}
+.tile .val{font-family:'Geist Mono',monospace;font-weight:600;letter-spacing:-.02em}
+.envbar>.r{background:var(--right)}.envbar>.u{background:var(--unb)}.envbar>.l{background:var(--left)}
+
+/* reading-order strip and teaching note: paper, like the Notes */
+.howto div{background:var(--card);border:0;box-shadow:0 0 0 1px var(--hair-strong);border-radius:10px}
+.howto div b{font-family:'Geist Mono',monospace;font-weight:600;letter-spacing:.04em}
+.teach{background:var(--accent-soft);border:1.5px solid color-mix(in srgb,var(--accent) 45%,transparent);border-radius:12px}
+
+/* controls: chrome beads on glass tubes, enamel keys, a navy primary key */
+input[type="range"]{height:8px;border-radius:5px;background:linear-gradient(90deg,rgba(255,255,255,.6),rgba(205,226,240,.25) 50%,rgba(255,255,255,.5)),var(--hair);box-shadow:inset 0 0 0 1px var(--hair-strong)}
+input[type="range"]::-webkit-slider-thumb{width:22px;height:22px;border:0;background:radial-gradient(circle at 35% 30%,#fff 0 18%,#d5dbe0 45%,#8f9aa3 100%);box-shadow:0 2px 5px rgba(0,20,40,.45)}
+input[type="range"]::-moz-range-thumb{width:22px;height:22px;border:0;background:radial-gradient(circle at 35% 30%,#fff 0 18%,#d5dbe0 45%,#8f9aa3 100%);box-shadow:0 2px 5px rgba(0,20,40,.45)}
+input[type="range"].bias{background:linear-gradient(90deg,var(--left),var(--hair-strong) 50%,var(--right))}
+.biasfill>.l{background:var(--left)}.biasfill>.r{background:var(--right)}
+.seg{border:0;border-radius:9px;box-shadow:inset 0 0 0 1.5px var(--line);overflow:hidden}
+.seg button{font-family:'Geist',sans-serif;letter-spacing:.02em}
+.seg button.on{background:var(--key);color:var(--on-key)}
+.btn{background:var(--key);color:var(--on-key);border-radius:12px;letter-spacing:.02em;box-shadow:0 4px 10px rgba(14,34,51,.25)}
+.btn:focus-visible{outline:2.5px solid var(--accent)}
+.check input{accent-color:var(--accent)}
+details.data summary{color:var(--ink);font-family:'Geist Mono',monospace;border-bottom:1.5px solid var(--accent);display:inline-block}
+
+/* the joint grid: each cell a vial filled with the liquid */
+.board .cell{border:0;border-radius:8px 8px 12px 12px;background:linear-gradient(90deg,rgba(255,255,255,.55),rgba(205,226,240,.2) 45%,rgba(255,255,255,.45));box-shadow:inset 0 0 0 1.5px var(--hair-strong)}
+.board .cell>i{background:var(--right)}
+.board .marg{box-shadow:inset 0 0 0 1.5px var(--line);border-style:solid}
+.board .marg>i{background:var(--right)}
+.pill.ok{color:var(--ok)}.pill.warn{color:var(--warn)}
+footer{color:var(--muted)}
+</style>
+</body></html>

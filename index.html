@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Poster companion for Priors and Prejudice (ABRCMS 2026): hands-on Bayesian observer stations.">
+<title>Priors and Prejudice</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="wetlab.css">
+</head>
+<body>
+<style>
+/* shelf page */
+.shelfrow{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;align-items:end;padding:0 4px}
+.obj{appearance:none;border:0;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;padding:6px 0 0;min-width:0}
+.obj svg{width:100%;max-width:96px;height:96px;display:block;filter:drop-shadow(0 6px 6px rgba(14,34,51,.18));transition:transform .2s var(--slosh)}
+.obj:hover svg,.obj:focus-visible svg{transform:translateY(-3px)}
+.obj .plate{font-size:11px;letter-spacing:.12em;padding:4px 8px 5px;white-space:nowrap}
+.obj .plate .n{font-size:10.5px}
+.shelfwrap{display:flex;flex-direction:column;gap:0}
+.shelfwrap .shelf{margin-top:-2px}
+.mail{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.addr{font:500 15px var(--mono);user-select:all;overflow-wrap:anywhere;min-width:0;flex:1 1 100%}
+.role{font:400 12.5px/1.5 var(--mono);color:var(--ink2);margin:0}
+.by{font:400 12.5px/1.55 var(--mono);color:var(--ink2);margin:12px 0 0}
+.by b{font-weight:600;color:var(--ink)}
+.howto{font:400 13px/1.45 var(--mono);color:var(--ink2);margin:0}
+
+/* stations share these */
+.station[hidden]{display:none}
+.instrument{display:flex;flex-direction:column;gap:14px}
+
+/* 01 dial */
+.s1grid{display:grid;grid-template-columns:1fr 92px;gap:14px;align-items:stretch}
+.window{border-radius:14px;overflow:hidden;background:#7d8790;box-shadow:inset 0 0 0 3px var(--steel1),inset 0 0 0 4.5px var(--steel2),0 4px 10px rgba(14,34,51,.18);aspect-ratio:4/3;width:100%;max-width:100%}
+.window canvas{width:100%;height:100%;display:block}
+.knobrow{display:flex;align-items:center;gap:16px}
+.knob{position:relative;width:108px;height:108px;flex:none;border-radius:50%;touch-action:none;cursor:grab;
+  background:radial-gradient(circle at 38% 30%,#ffffff 0 10%,#e3e8eb 30%,#a9b3ba 72%,#8a959d 100%);
+  box-shadow:0 0 0 6px #d5dbe0,0 0 0 7px #8f9aa3,0 8px 16px rgba(14,34,51,.35),inset 0 -4px 8px rgba(14,34,51,.25)}
+.knob::after{content:"";position:absolute;left:50%;top:8px;width:5px;height:24px;margin-left:-2.5px;border-radius:3px;background:var(--ink);transform-origin:50% 46px;transform:rotate(var(--rot,0deg))}
+.knobring{position:absolute;inset:-16px;border-radius:50%;pointer-events:none;background:repeating-conic-gradient(from -135deg,var(--ink2) 0 1.2deg,transparent 1.2deg 27deg);-webkit-mask:radial-gradient(circle,transparent 62px,#000 63px,#000 66px,transparent 67px);mask:radial-gradient(circle,transparent 62px,#000 63px,#000 66px,transparent 67px);opacity:.6;clip-path:polygon(50% 50%,0 100%,0 0,100% 0,100% 100%)}
+.knobread{display:flex;flex-direction:column;gap:2px}
+.big{font:600 34px/1 var(--mono);letter-spacing:-1px}
+.tall{height:100%;min-height:220px;border-radius:12px 12px 18px 18px}
+.marker{position:absolute;left:-6px;right:-6px;height:0;border-top:2px dashed var(--ink);transition:bottom .6s var(--slosh)}
+.marker span{position:absolute;right:100%;top:-9px;margin-right:6px;font:500 10.5px var(--mono);white-space:nowrap;color:var(--ink2)}
+.tubehead{font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);text-align:center}
+
+/* belief tubes (02, 03, 05 replay) */
+.beliefs{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.belief{display:flex;flex-direction:column;align-items:center;gap:6px}
+.belief .glass{width:46px;height:150px;border-radius:8px 8px 16px 16px}
+.belief .pct{font:600 15px var(--mono)}
+.belief .nm{font:500 11px var(--mono);letter-spacing:.06em;color:var(--ink2);text-align:center;line-height:1.25}
+.line90{position:absolute;left:0;right:0;bottom:calc(90% * .97 + 3px);border-top:1.5px dashed var(--ink);opacity:.55}
+
+/* 02 burette with clamp */
+.s2grid{display:grid;grid-template-columns:110px 1fr;gap:14px;align-items:start}
+.burette{position:relative;height:300px;touch-action:none}
+.burette .glass{position:absolute;left:34px;top:0;bottom:0;width:30px;border-radius:6px 6px 4px 4px}
+.burette .scale{position:absolute;left:0;top:0;bottom:0;width:30px}
+.burette .scale span{position:absolute;right:0;transform:translateY(50%);font:500 10.5px var(--mono);color:var(--ink2)}
+.clamp{position:absolute;left:22px;width:76px;height:16px;border-radius:8px;transform:translateY(50%);cursor:ns-resize;
+  background:linear-gradient(180deg,#f7f9fa,#c2cad0 45%,#eef1f3 55%,#a9b3ba);box-shadow:0 2px 5px rgba(14,34,51,.35)}
+.clamp::before{content:"";position:absolute;inset:-14px -6px}
+.clamp b{position:absolute;left:0;bottom:100%;margin-bottom:3px;font:600 12px var(--mono);white-space:nowrap}
+.actualmark{position:absolute;left:28px;width:42px;border-top:3px solid var(--ink);transform:translateY(50%)}
+.actualmark b{position:absolute;left:100%;top:-9px;margin-left:30px;font:600 12px var(--mono);white-space:nowrap;color:var(--tint-ink)}
+.dripstrip{display:flex;flex-wrap:wrap;gap:3px;min-height:14px}
+.dripstrip i{width:10px;height:12px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;background:var(--tint);box-shadow:inset 0 2px 2px rgba(255,255,255,.5)}
+.dripstrip i.L{background:var(--ink)}
+.counter{font:600 13px var(--mono);color:var(--ink2)}
+
+/* 03 the five vessels */
+.vessels{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.vessel{display:flex;flex-direction:column;align-items:center;gap:6px;opacity:.45;transition:opacity .3s}
+.vessel.on{opacity:1}
+.vessel .glass{width:100%;max-width:58px;height:96px;border-radius:10px 10px 18px 18px}
+.vessel .nm{font:600 10.5px var(--mono);letter-spacing:.04em;text-align:center;line-height:1.2}
+.vessel .val{font:600 13px var(--mono)}
+.mini3{position:absolute;inset:6px 6px 6px 6px;display:flex;gap:3px;align-items:flex-end}
+.mini3 i{flex:1;background:var(--tint);border-radius:2px 2px 6px 6px;transition:height .6s var(--slosh)}
+.mini3 i:nth-child(2){background:#7f93a6}.mini3 i:nth-child(3){background:var(--ink)}
+.evscale{position:relative;height:72px;border-radius:12px;background:linear-gradient(90deg,rgba(14,34,51,.10),rgba(255,255,255,.6) 50%,var(--tint-soft));box-shadow:inset 0 0 0 1.5px var(--steel2)}
+.evscale .mid{position:absolute;left:50%;top:8px;bottom:8px;border-left:1.5px dashed var(--ink2)}
+.evscale .lab{position:absolute;bottom:6px;font:500 10.5px var(--mono);color:var(--ink2)}
+.evdrop{position:absolute;top:-20px;width:20px;height:24px;margin-left:-10px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;background:var(--tint);box-shadow:inset 0 3px 3px rgba(255,255,255,.55),0 2px 4px rgba(14,34,51,.3);opacity:0;transition:top .7s cubic-bezier(.5,0,.75,0),opacity .2s}
+.evdrop.in{top:30px;opacity:1}
+.spouts{display:flex;justify-content:center;gap:40px}
+.spout{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;font:600 15px var(--mono);
+  background:radial-gradient(circle at 38% 30%,#fff 0 10%,#e3e8eb 32%,#a9b3ba 80%);box-shadow:0 0 0 4px #d5dbe0,0 0 0 5px #8f9aa3,0 4px 8px rgba(14,34,51,.3);transition:background .25s,color .25s}
+.spout.lit{background:var(--ink);color:var(--en1)}
+.steptext{min-height:72px;font-size:16px;line-height:1.45;margin:0}
+.steptext .mono{font-weight:600}
+
+/* 04 beaker */
+.s4grid{display:grid;grid-template-columns:1fr;gap:14px}
+.beaker{position:relative;height:190px;border-radius:6px 6px 26px 26px;padding:12px 12px 14px;display:flex;flex-wrap:wrap-reverse;align-content:flex-start;gap:4px;justify-content:flex-start}
+.beaker i{width:14px;height:16px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;background:var(--tint);box-shadow:inset 0 2px 2px rgba(255,255,255,.5);animation:fall .35s cubic-bezier(.5,0,.75,0)}
+.beaker i.L{background:var(--ink)}
+@keyframes fall{from{transform:translateY(-120px);opacity:0}to{transform:none;opacity:1}}
+.capped{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.cap-tube{appearance:none;border:0;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;padding:0}
+.cap-tube .glass{width:46px;height:104px;border-radius:4px 4px 16px 16px}
+.cap-tube .stopper{width:40px;height:14px;border-radius:6px 6px 3px 3px;background:linear-gradient(180deg,#4a545d,#2b333a);margin-bottom:-6px;position:relative;z-index:1}
+.cap-tube .plate{font-size:11px;padding:3px 7px 4px}
+.cap-tube.right .plate{box-shadow:inset 0 0 0 2px var(--en1),inset 0 0 0 3.5px var(--tint-ink),0 0 0 1px var(--steel2)}
+.cap-tube[disabled]{cursor:default}
+.tally{display:flex;gap:16px;font:600 13px var(--mono)}
+
+/* 05 lever + burettes */
+.s5grid{display:grid;grid-template-columns:64px 1fr;gap:14px;align-items:stretch}
+.lever{position:relative;width:64px;height:260px;touch-action:none;cursor:pointer;appearance:none;border:0;background:none;padding:0}
+.lever .slot{position:absolute;left:26px;top:20px;bottom:20px;width:12px;border-radius:6px;background:linear-gradient(90deg,#2b333a,#4a545d);box-shadow:inset 0 2px 4px rgba(0,0,0,.5)}
+.lever .handle{position:absolute;left:4px;width:56px;height:30px;border-radius:15px;top:8px;transition:top .5s var(--slosh);
+  background:linear-gradient(180deg,#f7f9fa,#c2cad0 45%,#eef1f3 55%,#a9b3ba);box-shadow:0 3px 7px rgba(14,34,51,.4)}
+.lever.down .handle{top:222px}
+.lever .lab{position:absolute;left:0;right:0;bottom:-18px;text-align:center;font:600 10.5px var(--mono);letter-spacing:.1em;color:var(--ink2)}
+.burets{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.buret{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.buret .glass{width:34px;height:200px;border-radius:5px 5px 3px 3px}
+.buret .dots{position:absolute;left:0;right:0;top:0;bottom:0}
+.buret .val{font:600 26px/1 var(--mono);letter-spacing:-1px}
+.buret .nm{font:400 11px/1.3 var(--mono);color:var(--ink2);text-align:center}
+.hist{width:100%;height:40px;display:block}
+.why{appearance:none;border:0;cursor:pointer;font:600 12px var(--mono);letter-spacing:.1em;text-transform:uppercase;padding:12px 14px;min-height:40px;border-radius:7px;background:var(--ink);color:var(--en1)}
+.why[hidden]{display:none}
+.replay[hidden]{display:none}
+
+/* 06 game */
+.score{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.score .sheet{padding:14px 14px}
+.score .big{font-size:30px}
+.gamebtns{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.gamebtns .spout{width:100%;height:76px;border-radius:38px;font:600 16px var(--display);letter-spacing:.06em;cursor:pointer;border:0}
+.gamebtns .spout[disabled]{opacity:.5;cursor:default}
+.flash{transition:box-shadow .2s}
+.flash.ok{box-shadow:inset 0 0 0 3px var(--steel1),inset 0 0 0 4.5px var(--steel2),0 0 0 4px var(--tint)}
+.flash.no{box-shadow:inset 0 0 0 3px var(--steel1),inset 0 0 0 4.5px var(--steel2),0 0 0 4px var(--late)}
+</style>
+
+<div class="drops" id="drops" aria-hidden="true"></div>
+<main class="wrap">
+
+<!-- ===================== THE SHELF ===================== -->
+<section id="home" class="station stack">
+  <header>
+    <p class="eyebrow">ABRCMS 2026 · Poster companion</p>
+    <h1 class="title">Priors and Prejudice</h1>
+    <p class="lede">How many trials does a Bayesian observer need to learn a changing prior?</p>
+    <p class="by"><b>Raven Spellman</b>, Alyssa Romportl, Gidon Felsen, Tahra Eissa<br>University of Colorado Denver · University of Colorado Anschutz</p>
+  </header>
+  <p class="howto">Each instrument matches a panel on the poster. Tap one to try it.</p>
+  <div class="shelfwrap">
+    <div class="shelfrow">
+      <button class="obj" data-go="s1" aria-label="01 Why priors"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-dial"/></svg><span class="plate"><span class="n">01</span>Priors</span></button>
+      <button class="obj" data-go="s2" aria-label="02 The question"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-burette"/></svg><span class="plate"><span class="n">02</span>Question</span></button>
+      <button class="obj" data-go="s3" aria-label="03 The model"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-flask"/></svg><span class="plate"><span class="n">03</span>Model</span></button>
+    </div>
+    <div class="shelf"></div>
+  </div>
+  <div class="shelfwrap" style="margin-top:22px">
+    <div class="shelfrow">
+      <button class="obj" data-go="s4" aria-label="04 Simulated task"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-beaker"/></svg><span class="plate"><span class="n">04</span>Task</span></button>
+      <button class="obj" data-go="s5" aria-label="05 Preliminary results"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-rack"/></svg><span class="plate"><span class="n">05</span>Results</span></button>
+      <button class="obj" data-go="s6" aria-label="06 Takeaway and be the mouse"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-spouts"/></svg><span class="plate"><span class="n">06</span>Be the mouse</span></button>
+    </div>
+    <div class="shelf"></div>
+  </div>
+
+  <div class="sheet stack" style="margin-top:12px">
+    <span class="plate" style="align-self:flex-start">Get in touch</span>
+    <p class="role">Raven Spellman · Psychology B.S., University of Colorado Denver<br>MARC U-STAR Scholar · Eissa and Felsen labs</p>
+    <div class="mail"><span class="addr" id="addr">raven.spellman@ucdenver.edu</span><button class="chrome" id="copy" type="button" style="padding:12px 18px;font-size:13px">COPY</button></div>
+  </div>
+  <p class="cap">Model by Alyssa Romportl, Eissa and Felsen labs. Supported by the NIH MARC U-STAR program, T34GM149812. Everything here runs on your phone; nothing is collected.</p>
+</section>
+
+<!-- ===================== 01 ===================== -->
+<section id="s1" class="station stack" hidden>
+  <div class="bar"><button class="glassbtn" data-go="home" aria-label="Back to the shelf">←</button><span class="plate"><span class="n">01</span>Why priors</span></div>
+  <div><h2 class="title">Faint evidence, strong prior</h2>
+  <p class="lede">The mouse is in a mostly-right block (80/20) and knows it. This grating drifts <b>left</b>. Turn the dial down and watch where it licks.</p></div>
+  <div class="instrument">
+    <div class="s1grid">
+      <div class="stack" style="gap:14px">
+        <div class="window"><canvas id="g1" width="320" height="240" aria-label="Drifting grating"></canvas></div>
+        <div class="knobrow">
+          <div class="knob" id="knob" role="slider" tabindex="0" aria-label="Contrast" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><span class="knobring"></span></div>
+          <div class="knobread"><span class="cap">contrast</span><span class="big" id="k-val">1.00</span><span class="cap" id="k-word">strong</span></div>
+        </div>
+      </div>
+      <div class="stack" style="gap:6px;align-items:center">
+        <div class="tubehead">licks right</div>
+        <div class="glass tall" style="width:56px;flex:1"><i class="liq" id="t1" style="--lv:0%"></i><i class="ticks"></i><div class="marker" id="m1"></div></div>
+        <div class="big" id="t1v" style="font-size:22px">0%</div>
+        <div class="cap" id="m1v" style="text-align:center">- - no prior</div>
+      </div>
+    </div>
+  </div>
+  <p class="insight" id="ins1" hidden><b>What you just saw <span class="draft">draft</span></b>When the evidence is faint, the observer licks with the block, not the grating. That's the prior at work.</p>
+  <div class="next"><span></span><button class="chrome" data-go="s2">Next: the question →</button></div>
+</section>
+
+<!-- ===================== 02 ===================== -->
+<section id="s2" class="station stack" hidden>
+  <div class="bar"><button class="glassbtn" data-go="home" aria-label="Back to the shelf">←</button><span class="plate"><span class="n">02</span>The question</span></div>
+  <div><h2 class="title">How fast does it learn a block?</h2>
+  <p class="lede">It starts with no idea which block it's in. The block is 80/20. Drag the clamp: how many trials until it's 90% sure?</p></div>
+  <div class="instrument">
+    <div class="s2grid">
+      <div class="burette" id="bur2">
+        <div class="scale" id="sc2"></div>
+        <div class="glass"><i class="liq" id="b2liq" style="--lv:0%"></i></div>
+        <div class="actualmark" id="act2" hidden><b></b></div>
+        <div class="clamp" id="clamp2" role="slider" tabindex="0" aria-label="Your guess in trials" aria-valuemin="1" aria-valuemax="40"><b id="clampv">guess 15</b></div>
+      </div>
+      <div class="stack" style="gap:12px">
+        <div class="beliefs" id="bel2"></div>
+        <div class="counter" id="cnt2">trial 0</div>
+        <div class="dripstrip" id="drip2" aria-label="Trials so far"></div>
+      </div>
+    </div>
+    <div class="row"><button class="key" id="run2">Run the trials</button><span class="cap" id="res2"></span></div>
+  </div>
+  <p class="insight" id="ins2" hidden><b>What you just saw <span class="draft">draft</span></b>About 8 trials. A biased block is learned fast. The poster asks how that changes when the block switches.</p>
+  <div class="next"><button class="chrome" data-go="s1">← 01</button><button class="chrome" data-go="s3">Next: the model →</button></div>
+</section>
+
+<!-- ===================== 03 ===================== -->
+<section id="s3" class="station stack" hidden>
+  <div class="bar"><button class="glassbtn" data-go="home" aria-label="Back to the shelf">←</button><span class="plate"><span class="n">03</span>The model</span></div>
+  <div><h2 class="title">One trial, step by step</h2>
+  <p class="lede">Tap Step to walk one trial through the observer.</p></div>
+  <div class="instrument">
+    <div class="vessels">
+      <div class="vessel on" id="v0"><div class="glass"><div class="mini3" id="mini"><i></i><i></i><i></i></div></div><span class="nm">block<br>belief</span><span class="val" id="vv0">·</span></div>
+      <div class="vessel" id="v1"><div class="glass"><i class="liq" id="l1" style="--lv:0%"></i></div><span class="nm">prior<br>P(right)</span><span class="val" id="vv1">·</span></div>
+      <div class="vessel" id="v2"><div class="glass"><i class="liq" id="l2" style="--lv:0%;--c:#7f93a6"></i></div><span class="nm">evidence<br>m</span><span class="val" id="vv2">·</span></div>
+      <div class="vessel" id="v3"><div class="glass"><i class="liq" id="l3" style="--lv:0%"></i></div><span class="nm">posterior<br>P(right)</span><span class="val" id="vv3">·</span></div>
+      <div class="vessel" id="v4"><div class="glass"><i class="liq" id="l4" style="--lv:0%;--c:#0e2233"></i></div><span class="nm">lick</span><span class="val" id="vv4">·</span></div>
+    </div>
+    <div class="evscale" id="evs"><span class="mid"></span><span class="lab" style="left:10px">looks left</span><span class="lab" style="right:10px">looks right</span><span class="evdrop" id="evd"></span></div>
+    <div class="spouts"><span class="spout" id="spL">L</span><span class="spout" id="spR">R</span></div>
+    <p class="steptext" id="st3"></p>
+    <div class="row"><button class="key" id="step3">Step ▸</button><button class="chrome" id="new3">New trial</button></div>
+  </div>
+  <p class="insight" id="ins3" hidden><b>What you just saw <span class="draft">draft</span></b>Every trial it mixes what it expects with what it sees, then updates what it expects.</p>
+  <div class="next"><button class="chrome" data-go="s2">← 02</button><button class="chrome" data-go="s4">Next: the task →</button></div>
+</section>
+
+<!-- ===================== 04 ===================== -->
+<section id="s4" class="station stack" hidden>
+  <div class="bar"><button class="glassbtn" data-go="home" aria-label="Back to the shelf">←</button><span class="plate"><span class="n">04</span>Simulated task</span></div>
+  <div><h2 class="title">Which block is this?</h2>
+  <p class="lede">A block is hidden. Each drop is a trial: <b style="color:var(--tint-ink)">teal</b> means the grating moved right, <b>navy</b> means left. Tap the block when you think you know.</p></div>
+  <div class="instrument">
+    <div class="glass beaker" id="beaker" aria-label="Trials so far"></div>
+    <div class="tally"><span id="tR">right 0</span><span id="tL">left 0</span><span id="tN" style="color:var(--ink2)">trial 0</span></div>
+    <div class="capped" id="caps">
+      <button class="cap-tube" data-p="0.8"><span class="stopper"></span><span class="glass"><i class="liq" style="--lv:80%"></i></span><span class="plate">80/20</span></button>
+      <button class="cap-tube" data-p="0.5"><span class="stopper"></span><span class="glass"><i class="liq" style="--lv:50%"></i></span><span class="plate">50/50</span></button>
+      <button class="cap-tube" data-p="0.2"><span class="stopper"></span><span class="glass"><i class="liq" style="--lv:20%"></i></span><span class="plate">20/80</span></button>
+    </div>
+    <p class="steptext" id="res4" style="min-height:48px"></p>
+    <div class="row"><button class="chrome" id="new4">New hidden block</button></div>
+  </div>
+  <p class="insight" id="ins4" hidden><b>What you just saw <span class="draft">draft</span></b>The mouse never sees the label. It has to infer the block from trials, just like you did.</p>
+  <div class="next"><button class="chrome" data-go="s3">← 03</button><button class="chrome" data-go="s5">Next: results →</button></div>
+</section>
+
+<!-- ===================== 05 ===================== -->
+<section id="s5" class="station stack" hidden>
+  <div class="bar"><button class="glassbtn" data-go="home" aria-label="Back to the shelf">←</button><span class="plate"><span class="n">05</span>Results</span></div>
+  <div><h2 class="title">Run 500 mice</h2>
+  <p class="lede">Pull the lever to run 500 simulated mice through three situations. Each burette reads the median trials until 90% sure.</p></div>
+  <div class="instrument">
+    <div class="s5grid">
+      <button class="lever" id="lever" aria-label="Pull the lever to run 500 simulated mice"><span class="slot"></span><span class="handle"></span><span class="lab">PULL</span></button>
+      <div class="burets" id="burets"></div>
+    </div>
+    <div class="sheet replay stack" id="replay" hidden style="gap:12px">
+      <span class="plate" style="align-self:flex-start">Why so slow?</span>
+      <p class="cap" style="margin:0">One mouse: 19 trials of 80/20, then the block flips to 20/80.</p>
+      <div class="beliefs" id="bel5"></div>
+      <div class="counter" id="cnt5"></div>
+    </div>
+  </div>
+  <p class="insight" id="ins5" hidden><b>What you just saw <span class="draft">draft</span></b>After a long biased block it's so sure that the opposite block seems almost impossible. It passes through "unbiased" first, so relearning takes far longer.</p>
+  <div class="next"><button class="chrome" data-go="s4">← 04</button><button class="chrome" data-go="s6">Next: be the mouse →</button></div>
+</section>
+
+<!-- ===================== 06 ===================== -->
+<section id="s6" class="station stack" hidden>
+  <div class="bar"><button class="glassbtn" data-go="home" aria-label="Back to the shelf">←</button><span class="plate"><span class="n">06</span>Takeaway</span></div>
+  <div class="sheet paper"><p class="prompt"><span class="draft" style="margin:0 0 4px;display:block">draft · Raven's takeaway goes here</span>A Bayesian observer learns a biased block in about 8 trials but needs far longer after a reversal, so block lengths should leave room for relearning.</p></div>
+  <div><h2 class="title">Be the mouse</h2>
+  <p class="lede">20 trials in a hidden block. Watch the grating, then lick left or right. The observer plays the same trials.</p></div>
+  <div class="instrument">
+    <div class="window flash" id="win6"><canvas id="g6" width="320" height="240" aria-label="Grating for this trial"></canvas></div>
+    <div class="counter" id="cnt6">Tap Start</div>
+    <div class="gamebtns"><button class="spout" id="lickL" disabled>← LEFT</button><button class="spout" id="lickR" disabled>RIGHT →</button></div>
+    <div class="row"><button class="key" id="start6">Start</button></div>
+    <div class="score" id="score6" hidden>
+      <div class="sheet"><span class="cap">you</span><div class="big" id="sc-you">0/20</div></div>
+      <div class="sheet"><span class="cap">observer</span><div class="big" id="sc-obs">0/20</div></div>
+    </div>
+    <p class="steptext" id="res6" hidden></p>
+  </div>
+  <div class="next"><button class="chrome" data-go="s5">← 05</button><a class="chrome" href="model.html" style="text-decoration:none">Full bench →</a></div>
+</section>
+
+</main>
+
+<!-- shelf objects, drawn once -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="glassG" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity=".9"/><stop offset=".18" stop-color="#e3eef4" stop-opacity=".4"/><stop offset=".6" stop-color="#cfe2ec" stop-opacity=".35"/><stop offset="1" stop-color="#fff" stop-opacity=".75"/></linearGradient>
+    <linearGradient id="liqG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9ad6d3"/><stop offset=".12" stop-color="#35a3a0"/><stop offset="1" stop-color="#2b8f8c"/></linearGradient>
+    <radialGradient id="chromeG" cx=".38" cy=".3" r=".75"><stop offset="0" stop-color="#fff"/><stop offset=".35" stop-color="#e1e6ea"/><stop offset=".8" stop-color="#a3adb5"/><stop offset="1" stop-color="#7f8a93"/></radialGradient>
+    <linearGradient id="steelG" x1="0" x2="1"><stop offset="0" stop-color="#b6bfc6"/><stop offset=".45" stop-color="#f4f6f7"/><stop offset=".55" stop-color="#d0d6db"/><stop offset="1" stop-color="#9aa4ac"/></linearGradient>
+    <symbol id="i-dial" viewBox="0 0 100 100"><rect x="18" y="62" width="64" height="34" rx="6" fill="url(#steelG)" stroke="#8f9aa3"/><circle cx="50" cy="52" r="30" fill="#d5dbe0" stroke="#8f9aa3"/><circle cx="50" cy="52" r="23" fill="url(#chromeG)"/><rect x="48" y="31" width="4" height="15" rx="2" fill="#0e2233" transform="rotate(-40 50 52)"/><g stroke="#3a5264" stroke-width="1.5"><line x1="22" y1="70" x2="26" y2="67"/><line x1="78" y1="70" x2="74" y2="67"/><line x1="50" y1="18" x2="50" y2="22"/></g></symbol>
+    <symbol id="i-burette" viewBox="0 0 100 100"><rect x="20" y="4" width="4" height="92" rx="2" fill="url(#steelG)"/><rect x="14" y="92" width="44" height="6" rx="3" fill="url(#steelG)"/><rect x="18" y="30" width="34" height="6" rx="3" fill="url(#steelG)"/><rect x="40" y="6" width="18" height="76" rx="3" fill="url(#glassG)" stroke="#aeb6bd"/><rect x="42" y="44" width="14" height="36" fill="url(#liqG)"/><path d="M45 82h8l-2 8h-4z" fill="url(#glassG)" stroke="#aeb6bd"/><g stroke="#3a5264" stroke-width="1"><line x1="52" y1="14" x2="57" y2="14"/><line x1="52" y1="26" x2="57" y2="26"/><line x1="52" y1="38" x2="57" y2="38"/><line x1="52" y1="50" x2="57" y2="50"/><line x1="52" y1="62" x2="57" y2="62"/></g></symbol>
+    <symbol id="i-flask" viewBox="0 0 100 100"><path d="M40 8h20v6h-3v20l24 50c3 7-1 12-8 12H27c-7 0-11-5-8-12l24-50V14h-3z" fill="url(#glassG)" stroke="#aeb6bd" stroke-width="1.5"/><path d="M30 64h40l9 20c2 5-1 9-6 9H27c-5 0-8-4-6-9z" fill="url(#liqG)"/><ellipse cx="50" cy="64" rx="20" ry="2.5" fill="#9ad6d3"/><circle cx="44" cy="78" r="2.2" fill="#fff" opacity=".7"/><circle cx="56" cy="72" r="1.5" fill="#fff" opacity=".7"/></symbol>
+    <symbol id="i-beaker" viewBox="0 0 100 100"><path d="M20 14h60v72c0 6-4 10-10 10H30c-6 0-10-4-10-10z" fill="url(#glassG)" stroke="#aeb6bd" stroke-width="1.5"/><path d="M16 14h68" stroke="#aeb6bd" stroke-width="3" stroke-linecap="round"/><g><ellipse cx="32" cy="86" rx="5" ry="5.5" fill="#35a3a0"/><ellipse cx="44" cy="86" rx="5" ry="5.5" fill="#0e2233"/><ellipse cx="56" cy="86" rx="5" ry="5.5" fill="#35a3a0"/><ellipse cx="68" cy="86" rx="5" ry="5.5" fill="#35a3a0"/><ellipse cx="38" cy="75" rx="5" ry="5.5" fill="#35a3a0"/><ellipse cx="50" cy="75" rx="5" ry="5.5" fill="#35a3a0"/><ellipse cx="62" cy="75" rx="5" ry="5.5" fill="#0e2233"/><ellipse cx="50" cy="40" rx="4" ry="4.8" fill="#35a3a0"/></g></symbol>
+    <symbol id="i-rack" viewBox="0 0 100 100"><rect x="8" y="58" width="84" height="8" rx="3" fill="url(#steelG)"/><rect x="12" y="90" width="76" height="6" rx="3" fill="url(#steelG)"/><g><rect x="18" y="20" width="14" height="72" rx="3" fill="url(#glassG)" stroke="#aeb6bd"/><rect x="20" y="82" width="10" height="8" fill="url(#liqG)"/><rect x="43" y="20" width="14" height="72" rx="3" fill="url(#glassG)" stroke="#aeb6bd"/><rect x="45" y="72" width="10" height="18" fill="url(#liqG)"/><rect x="68" y="20" width="14" height="72" rx="3" fill="url(#glassG)" stroke="#aeb6bd"/><rect x="70" y="30" width="10" height="60" fill="url(#liqG)"/></g></symbol>
+    <symbol id="i-spouts" viewBox="0 0 100 100"><rect x="14" y="70" width="72" height="24" rx="8" fill="url(#steelG)" stroke="#8f9aa3"/><rect x="28" y="22" width="8" height="52" rx="3" fill="url(#steelG)" stroke="#8f9aa3"/><rect x="64" y="22" width="8" height="52" rx="3" fill="url(#steelG)" stroke="#8f9aa3"/><path d="M28 22c0-8 8-8 8 0" fill="url(#steelG)"/><circle cx="32" cy="18" r="5" fill="url(#chromeG)"/><circle cx="68" cy="18" r="5" fill="url(#chromeG)"/><ellipse cx="68" cy="30" rx="3" ry="3.6" fill="#35a3a0"/></symbol>
+  </defs>
+</svg>
+
+<script src="model.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
