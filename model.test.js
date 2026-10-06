@@ -1,11 +1,11 @@
 // node model.test.js : the phone app's model must agree with the poster's Python numbers
 require('./model.js'); const M = globalThis.WLModel; let fail = 0;
 function check(name, ok, got) { console.log((ok ? 'PASS ' : 'FAIL ') + name + '  ' + got); if (!ok) fail++; }
-const expect = { biased: [8, 1], unbiased: [18, 2], reversal: [66, 5] };   // poster median, allowed wobble across seeds
+const expect = { biased: [8, 0], unbiased: [18, 2], reversal: [66, 5] };   // poster medians; 2,000 runs keeps biased at exactly 8
 for (const seed of [20261006, 12345, 777]) {
   for (const c of M.CONDITIONS) {
-    const r = M.runCondition(c, 500, seed), [m, tol] = expect[c.key];
-    check(`${c.key} median seed ${seed}`, Math.abs(r.median - m) <= tol, `median ${r.median}, never ${r.never}/500`);
+    const r = M.runCondition(c, 2000, seed), [m, tol] = expect[c.key];
+    check(`${c.key} median seed ${seed}`, Math.abs(r.median - m) <= tol, `median ${r.median}, never ${r.never}/2000`);
   }
 }
 // posterior sanity: flat prior, m = 0 -> 0.5; strong right evidence -> > 0.9

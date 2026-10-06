@@ -158,9 +158,9 @@
       var act = $("act2"); act.hidden = false;
       if (hit) { act.style.bottom = (hit / MAXT * 100) + "%"; act.querySelector("b").textContent = "took " + hit; setLv($("b2liq"), hit / MAXT); }
       else { act.style.bottom = "100%"; act.querySelector("b").textContent = "not in 40"; }
-      if (median2 === null) median2 = M.runCondition(M.CONDITIONS[0], 500, freshSeed()).median;
+      if (median2 === null) median2 = M.runCondition(M.CONDITIONS[0], 2000, freshSeed()).median;
       var diff = hit ? Math.abs(hit - guess) : null;
-      $("res2").textContent = (hit ? "This mouse took " + hit + " trials. You guessed " + guess + (diff === 0 ? ", exactly. " : " (off by " + diff + "). ") : "This mouse wasn't sure within 40 trials. ") + "Median of 500 mice: " + median2 + ".";
+      $("res2").textContent = (hit ? "This mouse took " + hit + " trials. You guessed " + guess + (diff === 0 ? ", exactly. " : " (off by " + diff + "). ") : "This mouse wasn't sure within 40 trials. ") + "Median of 2,000 mice: " + median2 + ".";
       $("ins2").hidden = false; this.disabled = false; this.textContent = "Run another mouse"; running = false;
     });
     placeClamp(); reset();
@@ -259,7 +259,7 @@
   })();
 
   /* =====================================================================
-     05 · run 500 mice
+     05 · run 2,000 mice
      ===================================================================== */
   (function () {
     var host = $("burets"), parts = [], ran = false, XMAX = 80;
@@ -281,10 +281,10 @@
       parts.forEach(function (p) { setLv(p.liq, 0); p.val.textContent = "·"; });
       await wait(450);
       for (var i = 0; i < M.CONDITIONS.length; i++) {
-        var r = M.runCondition(M.CONDITIONS[i], 500, freshSeed()), p = parts[i];
+        var r = M.runCondition(M.CONDITIONS[i], 2000, freshSeed()), p = parts[i];
         setLv(p.liq, r.median / XMAX); p.val.textContent = r.median;
         hist(p.cv, r.values);
-        if (p.why) { p.why.hidden = false; p.why.title = r.never + " of 500 weren't sure within 100 trials"; }
+        if (p.why) { p.why.hidden = false; p.why.title = r.never + " of 2,000 weren't sure within 100 trials"; }
         await wait(380);
       }
       lv.classList.remove("down", "busy"); ran = true; $("ins5").hidden = false;
