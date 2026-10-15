@@ -1,260 +1,214 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found]){display:none!important}</style></head><body>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Block Belief Machine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap">
 <style>
-  :root {
-    --paper: #eef0f4;
-    --card: #ffffff;
-    --ink: #1b1d23;
-    --muted: #5c6473;
-    --faint: #8a91a0;
-    --hair: #dde1e8;
-    --hair-strong: #cbd1db;
-    --accent: #7c3aed;
-    --accent-soft: #7c3aed1f;
-    --ok: #2f8f5b;
-    --warn: #b7791f;
-    --grid: #e6e9ef;
-    --right: #2a78d6;
-    --left: #e34948;
-    --unb: #6f6b76;
-    --acc: #1baf7a;
-    --right-soft: #2a78d622;
-    --left-soft: #e3494822;
-    --unb-soft: #6f6b7622;
-    --shadow: 0 1px 2px rgba(20,22,30,.06), 0 8px 24px rgba(20,22,30,.06);
-    color-scheme: light;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --paper: #131219;
-      --card: #1d1c26;
-      --ink: #ece9f2;
-      --muted: #9a97a8;
-      --faint: #6f6c7e;
-      --hair: #2b2937;
-      --hair-strong: #3a3749;
-      --accent: #a78bfa;
-      --accent-soft: #a78bfa22;
-      --ok: #52c08a;
-      --warn: #e0a94a;
-      --grid: #262433;
-      --right: #3987e5;
-      --left: #e66767;
-      --unb: #9b97a6;
-      --acc: #199e70;
-      --right-soft: #3987e522;
-      --left-soft: #e6676722;
-      --unb-soft: #9b97a622;
-      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
-      color-scheme: dark;
-    }
-  }
-  :root[data-theme="dark"] {
-    --paper: #131219; --card: #1d1c26; --ink: #ece9f2; --muted: #9a97a8; --faint: #6f6c7e;
-    --hair: #2b2937; --hair-strong: #3a3749; --accent: #a78bfa; --accent-soft: #a78bfa22;
-    --ok: #52c08a; --warn: #e0a94a; --grid: #262433;
-    --right: #3987e5; --left: #e66767; --unb: #9b97a6; --acc: #199e70;
-    --right-soft: #3987e522; --left-soft: #e6676722; --unb-soft: #9b97a622;
-    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35); color-scheme: dark;
-  }
+/* Lab-bench look: tiled wall, enamel labels, glass sheets, chrome buttons, liquid as quantity. Day mode only. */
+:root{
+  --ink:#0e2233;--ink2:#3a5264;--ink3:#5a6b78;
+  --wall-a:#eef4f7;--wall-b:#dde8ef;--grout:rgba(110,145,165,.2);--sheen:rgba(255,255,255,.55);--glow:rgba(255,255,255,.9);
+  --en1:#fdfefd;--en2:#e9ecea;--hi:#fff;--onink:#fdfefd;
+  --sheet:rgba(250,253,254,.86);--sheet-edge:rgba(255,255,255,.95);--sheet-line:rgba(110,170,195,.32);
+  --paper:#fbf8f1;--paper-ink:#0e2233;--code-bg:#f3f7f9;--code-hl:rgba(53,163,160,.16);
+  --tint:#35a3a0;--tint-ink:#23807d;
+  --right:#2a68b0;--left:#c2611f;--world:#5f7486;--mouse:#23807d;
+  --ok:#2c7a4b;--miss:#b9313d;--dim:rgba(14,34,51,.13);
+  --chrome:linear-gradient(180deg,#ffffff 0%,#eef1f4 12%,#c6cdd4 30%,#8f98a1 46%,#d9dee3 54%,#f6f8f9 63%,#adb5bd 82%,#e2e6ea 100%);
+  --chrome-ink:#0e2233;--contact:rgba(12,28,40,.22);
+  --f-body:'Geist',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-mono:'Geist Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+/* page aliases onto the bench tokens (charts read these) */
+:root{
+  color-scheme:light;
+  --card:#fafdfe;--muted:var(--ink2);--faint:var(--ink3);
+  --hair:var(--sheet-line);--hair-strong:rgba(110,145,165,.5);
+  --accent:var(--tint-ink);--accent-soft:var(--code-hl);
+  --warn:var(--miss);--grid:var(--dim);
+  --unb:var(--ink3);--acc:var(--mouse);
+  --right-soft:color-mix(in srgb,var(--right) 14%,transparent);
+  --left-soft:color-mix(in srgb,var(--left) 14%,transparent);
+  --unb-soft:color-mix(in srgb,var(--unb) 14%,transparent);
+  --shadow:inset 0 0 0 1px var(--sheet-line),0 10px 24px var(--contact);
+}
 
-  * { box-sizing: border-box; }
-  [hidden] { display: none !important; }
-  body {
-    margin: 0;
-    background: var(--paper);
-    color: var(--ink);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-  }
-  .mono { font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, "Cascadia Code", Consolas, monospace; font-variant-numeric: tabular-nums; }
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;min-height:100%;color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;
+  background:linear-gradient(180deg,var(--sheen),rgba(255,255,255,0) 40%),
+    repeating-linear-gradient(0deg,var(--grout) 0 1px,rgba(255,255,255,0) 1px 52px),
+    repeating-linear-gradient(90deg,var(--grout) 0 1px,rgba(255,255,255,0) 1px 78px),
+    linear-gradient(180deg,var(--wall-a) 0%,var(--wall-b) 100%);background-attachment:fixed;background-color:var(--wall-b)}
+:focus-visible{outline:2.5px solid var(--tint-ink);outline-offset:3px}
+.mono,code{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
 
-  .wrap { max-width: 1120px; margin: 0 auto; padding: 28px 20px 56px; }
+.wrap{max-width:1120px;margin:0 auto;padding:22px 16px 64px;overflow-x:clip}
 
-  header.top { margin-bottom: 22px; }
-  .eyebrow {
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
-    font-size: 11px; letter-spacing: .22em; text-transform: uppercase;
-    color: var(--accent); margin: 0 0 6px;
-  }
-  h1 {
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
-    font-weight: 600; font-size: clamp(24px, 4vw, 34px); letter-spacing: -.01em;
-    margin: 0 0 6px; text-wrap: balance;
-  }
-  .lede { color: var(--muted); margin: 0; max-width: 66ch; }
+/* enamel label */
+.enamel{display:inline-block;padding:3px;border-radius:4px;background:linear-gradient(180deg,var(--en1),var(--en2));box-shadow:0 1px 2px rgba(0,0,0,.25),inset 0 1px 0 var(--hi);vertical-align:middle}
+.enamel>span{display:block;padding:3px 8px;border:1.2px solid var(--ink);border-radius:2px;font-family:var(--f-mono);font-weight:600;font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;white-space:nowrap;color:var(--ink)}
+.enamel.w>span{border-color:var(--world);color:var(--world)}
+.enamel.m>span{border-color:var(--mouse);color:var(--mouse)}
 
-  .tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 22px 0; }
-  .tile {
-    background: var(--card); border: 1px solid var(--hair); border-radius: 12px;
-    padding: 14px 15px; box-shadow: var(--shadow); min-width: 0;
-  }
-  .tile .lbl {
-    font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--faint);
-    margin: 0 0 8px;
-  }
-  .tile .val { font-size: 26px; font-weight: 600; letter-spacing: -.01em; line-height: 1.15; }
-  .tile .sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
-  .envbar { height: 7px; border-radius: 4px; margin-top: 10px; overflow: hidden; display: flex; gap: 2px; background: var(--card); }
-  .envbar > i { display: block; height: 100%; }
-  .envbar > .r { background: var(--right); }
-  .envbar > .u { background: var(--unb); }
-  .envbar > .l { background: var(--left); }
+header.top{margin-bottom:20px}
+.eyebrow{margin:0 0 10px}
+h1{font-family:var(--f-body);font-weight:600;font-size:clamp(24px,4vw,32px);letter-spacing:-.02em;line-height:1.15;margin:0 0 8px;text-wrap:balance}
+.lede{color:var(--ink2);margin:0;max-width:66ch}
 
-  .pill {
-    display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600;
-    padding: 4px 10px; border-radius: 999px; letter-spacing: .01em; white-space: nowrap;
-  }
-  .pill .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
-  .pill.r { background: var(--right-soft); color: var(--ink); }
-  .pill.u { background: var(--unb-soft); color: var(--ink); }
-  .pill.l { background: var(--left-soft); color: var(--ink); }
-  .pill.ok   { background: color-mix(in srgb, var(--ok) 16%, transparent); color: var(--ok); }
-  .pill.warn { background: color-mix(in srgb, var(--warn) 18%, transparent); color: var(--warn); }
-  .pill.mute { background: var(--accent-soft); color: var(--muted); }
+/* glass sheets */
+.tile,.panel,.howto div,.board .cell,.tooltip{background:var(--sheet);border:1px solid var(--sheet-edge);box-shadow:var(--shadow)}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:20px 0}
+.tile{border-radius:10px;padding:14px 15px;min-width:0}
+.tile .lbl{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);margin:0 0 8px}
+.tile .val{font-size:26px;font-weight:600;letter-spacing:-.015em;line-height:1.15;font-variant-numeric:tabular-nums}
+.tile .sub{font-size:12.5px;color:var(--ink2);margin-top:4px}
 
-  .grid2 { display: grid; grid-template-columns: 308px 1fr; gap: 18px; align-items: start; }
+/* tubes as quantities: horizontal glass tube with liquid segments */
+.envbar,.biasfill{position:relative;display:flex;overflow:hidden;border:1.5px solid var(--sheet-line);background:rgba(255,255,255,.35);box-shadow:inset 0 1px 2px rgba(14,34,51,.12)}
+.envbar{height:14px;border-radius:7px;margin-top:10px;gap:0}
+.envbar::after,.biasfill::after{content:"";position:absolute;left:4px;right:4px;top:2px;height:3px;border-radius:2px;background:rgba(255,255,255,.55);pointer-events:none}
+.envbar>i{display:block;height:100%;transition:width .5s cubic-bezier(.3,1.25,.5,1)}
+.envbar>.r{background:linear-gradient(180deg,color-mix(in srgb,var(--right) 55%,white),var(--right))}
+.envbar>.u{background:linear-gradient(180deg,color-mix(in srgb,var(--unb) 55%,white),var(--unb))}
+.envbar>.l{background:linear-gradient(180deg,color-mix(in srgb,var(--left) 55%,white),var(--left))}
+.biasfill{height:14px;border-radius:7px;margin-top:9px}
+.biasfill>.l{background:linear-gradient(180deg,color-mix(in srgb,var(--left) 55%,white),var(--left))}
+.biasfill>.r{background:linear-gradient(180deg,color-mix(in srgb,var(--right) 55%,white),var(--right));flex:1}
 
-  .panel {
-    background: var(--card); border: 1px solid var(--hair); border-radius: 14px;
-    padding: 18px; box-shadow: var(--shadow);
-  }
-  .panel + .panel { margin-top: 16px; }
-  .panel h2 {
-    font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
-    margin: 0 0 14px; font-weight: 700; display: flex; justify-content: space-between; align-items: baseline; gap: 10px;
-  }
-  .panel h2 .hint { font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--faint); font-size: 12px; }
-  .panel.world h2 { color: var(--right); }
-  .panel.observer h2 { color: var(--acc); }
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:4px 10px;border-radius:999px;white-space:nowrap}
+.pill .dot{width:9px;height:9px;border-radius:50%;flex:none}
+.pill.r{background:var(--right-soft);color:var(--ink)}
+.pill.u{background:var(--unb-soft);color:var(--ink)}
+.pill.l{background:var(--left-soft);color:var(--ink)}
+.pill.ok{background:color-mix(in srgb,var(--ok) 14%,transparent);color:var(--ok)}
+.pill.warn{background:color-mix(in srgb,var(--warn) 12%,transparent);color:var(--warn)}
+.pill.mute{background:var(--accent-soft);color:var(--ink2)}
 
-  .ctrl { margin-bottom: 18px; }
-  .ctrl:last-child { margin-bottom: 0; }
-  .ctrl .row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; gap: 8px; }
-  .ctrl label { font-size: 13px; font-weight: 600; }
-  .ctrl .rdval { font-size: 13px; color: var(--muted); white-space: nowrap; }
-  .ctrl .note { font-size: 12px; color: var(--faint); margin-top: 6px; line-height: 1.45; }
-  input[type="range"] {
-    -webkit-appearance: none; appearance: none; width: 100%; height: 5px; border-radius: 4px;
-    background: var(--hair-strong); outline: none; margin: 4px 0;
-  }
-  input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%;
-    background: var(--accent); border: 3px solid var(--card); box-shadow: 0 1px 3px rgba(0,0,0,.3); cursor: pointer;
-  }
-  input[type="range"]::-moz-range-thumb {
-    width: 18px; height: 18px; border-radius: 50%; background: var(--accent);
-    border: 3px solid var(--card); box-shadow: 0 1px 3px rgba(0,0,0,.3); cursor: pointer;
-  }
-  input[type="range"]:focus-visible { box-shadow: 0 0 0 3px var(--accent-soft); }
-  input[type="range"]:disabled { opacity: .35; }
-  input[type="range"].bias { background: linear-gradient(90deg, var(--left), var(--hair-strong) 50%, var(--right)); }
-  .biasfill { height: 10px; border-radius: 5px; overflow: hidden; display: flex; margin-top: 9px; border: 1px solid var(--hair); }
-  .biasfill > .l { background: var(--left); }
-  .biasfill > .r { background: var(--right); flex: 1; }
+.grid2{display:grid;grid-template-columns:316px minmax(0,1fr);gap:18px;align-items:start}
+.grid2>div{min-width:0}
 
-  .seg { display: inline-flex; border: 1px solid var(--hair-strong); border-radius: 9px; overflow: hidden; }
-  .seg.full { display: flex; }
-  .seg.full button { flex: 1; }
-  .seg button {
-    appearance: none; border: 0; background: transparent; color: var(--muted); cursor: pointer;
-    padding: 7px 10px; font-size: 12.5px; font-weight: 600; font-family: inherit; white-space: nowrap;
-  }
-  .seg button.on { background: var(--accent-soft); color: var(--ink); }
-  .seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.panel{border-radius:10px;padding:20px;min-width:0}
+.panel+.panel{margin-top:16px}
+.panel h2{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink2);margin:0 0 14px;font-weight:600;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.panel h2 .hint{font-family:var(--f-body);font-weight:500;letter-spacing:0;text-transform:none;color:var(--ink3);font-size:12.5px}
+.panel.world{box-shadow:inset 3px 0 0 var(--world),var(--shadow)}
+.panel.observer{box-shadow:inset 3px 0 0 var(--mouse),var(--shadow)}
 
-  .check { display: flex; align-items: center; gap: 9px; font-size: 13px; font-weight: 600; cursor: pointer; }
-  .check input { width: 16px; height: 16px; accent-color: var(--accent); margin: 0; }
+.ctrl{margin-bottom:18px}
+.ctrl:last-child{margin-bottom:0}
+.ctrl .row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;gap:8px}
+.ctrl label{font-size:13.5px;font-weight:600}
+.ctrl .rdval{font-family:var(--f-mono);font-size:13px;color:var(--ink2);white-space:nowrap}
+.ctrl .note{font-size:12.5px;color:var(--ink3);margin-top:6px;line-height:1.45}
 
-  .btn {
-    appearance: none; width: 100%; margin-top: 4px; cursor: pointer;
-    background: var(--accent); color: #fff; border: 0; border-radius: 10px;
-    padding: 11px 14px; font-size: 14px; font-weight: 600; font-family: inherit;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-  }
-  .btn:hover { filter: brightness(1.06); }
-  .btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+/* sliders: glass track, chrome bead */
+input[type="range"]{-webkit-appearance:none;appearance:none;width:100%;height:8px;border-radius:4px;background:rgba(110,145,165,.28);box-shadow:inset 0 1px 2px rgba(14,34,51,.18);outline:none;margin:8px 0}
+input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:24px;height:24px;border-radius:50%;background:var(--chrome);border:0;box-shadow:inset 0 1px 0 var(--hi),inset 0 -1px 0 rgba(0,0,0,.2),0 2px 6px var(--contact),0 0 0 2px var(--tint) inset;cursor:pointer}
+input[type="range"]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:var(--chrome);border:2px solid var(--tint);box-shadow:0 2px 6px var(--contact);cursor:pointer}
+input[type="range"]:disabled{opacity:.35}
+input[type="range"].bias{background:linear-gradient(90deg,var(--left),rgba(110,145,165,.28) 50%,var(--right))}
+.panel.observer input[type="range"]::-webkit-slider-thumb{box-shadow:inset 0 1px 0 var(--hi),inset 0 -1px 0 rgba(0,0,0,.2),0 2px 6px var(--contact),0 0 0 2px var(--mouse) inset}
 
-  .teach {
-    background: var(--accent-soft); border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
-    border-radius: 12px; padding: 13px 15px; margin: 0 0 16px; font-size: 13.5px; line-height: 1.55;
-  }
-  .teach .num { font-weight: 600; }
+/* segmented: ghost pills, chosen one is chrome */
+.seg{display:inline-flex;gap:6px;flex-wrap:wrap}
+.seg.full{display:flex}
+.seg.full button{flex:1 1 0}
+.seg button{appearance:none;min-height:38px;padding:0 12px;border:1.2px solid var(--sheet-line);border-radius:19px;background:transparent;color:var(--ink2);cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;white-space:nowrap}
+.seg button:hover{color:var(--ink);border-color:var(--tint-ink)}
+.seg button.on{color:var(--chrome-ink);background:var(--chrome);border-color:transparent;box-shadow:inset 0 1px 0 var(--hi),inset 0 -1px 0 rgba(0,0,0,.2),0 2px 6px var(--contact)}
 
-  .chart { position: relative; }
-  .chart svg { display: block; width: 100%; height: auto; }
-  .clab { font-family: ui-monospace, Menlo, monospace; font-size: 10px; fill: var(--faint); }
-  .cend { font-family: ui-monospace, Menlo, monospace; font-size: 10.5px; fill: var(--muted); }
-  .legend { display: flex; gap: 14px; margin-top: 8px; font-size: 12px; color: var(--muted); flex-wrap: wrap; }
-  .legend span { display: inline-flex; align-items: center; gap: 6px; }
-  .legend i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex: none; }
-  .legend i.line { width: 16px; height: 0; border-top: 2px solid; border-radius: 0; }
-  .legend i.dash { width: 16px; height: 0; border-top: 2px dashed; border-radius: 0; }
-  .legend i.ring { background: transparent; border: 2px solid var(--muted); }
-  .caption { font-size: 13px; color: var(--muted); margin: 10px 0 0; line-height: 1.5; max-width: 76ch; }
-  .caption b { color: var(--ink); font-weight: 600; }
-  .howto { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 0 0 16px; }
-  .howto div { background: var(--card); border: 1px solid var(--hair); border-radius: 10px; padding: 10px 12px; font-size: 12.5px; line-height: 1.45; color: var(--muted); }
-  .howto div b { display: block; color: var(--ink); font-size: 12px; margin-bottom: 2px; }
-  .ytitle { font-size: 10.5px; fill: var(--muted); }
-  .band { font-family: ui-monospace, Menlo, monospace; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; fill: var(--muted); }
+.check{display:flex;align-items:center;gap:10px;font-size:13.5px;font-weight:600;cursor:pointer;min-height:32px}
+.check input{width:20px;height:20px;accent-color:var(--tint);margin:0}
 
-  .tooltip {
-    position: fixed; pointer-events: none; z-index: 20; opacity: 0; transition: opacity .08s;
-    background: var(--card); border: 1px solid var(--hair-strong); border-radius: 9px;
-    box-shadow: var(--shadow); padding: 8px 10px; font-size: 12px; min-width: 190px;
-  }
-  .tooltip .tt-h { font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: var(--faint); margin-bottom: 5px; }
-  .tooltip .tt-r { display: flex; justify-content: space-between; gap: 14px; align-items: center; }
-  .tooltip .tt-r .k { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); }
-  .tooltip .tt-r .k i { width: 12px; height: 0; border-top: 2px solid; display: inline-block; }
-  .tooltip .tt-r .v { font-family: ui-monospace, Menlo, monospace; font-variant-numeric: tabular-nums; font-weight: 600; }
-  .tooltip hr { border: 0; border-top: 1px solid var(--hair); margin: 5px 0; }
+/* chrome button */
+.btn{appearance:none;width:100%;margin-top:4px;cursor:pointer;min-height:44px;padding:0 18px;border:0;border-radius:22px;font-weight:600;font-size:15px;font-family:inherit;color:var(--chrome-ink);background:var(--chrome);box-shadow:inset 0 1px 0 var(--hi),inset 0 -1px 0 rgba(0,0,0,.2),0 3px 8px var(--contact);display:flex;align-items:center;justify-content:center;gap:8px}
+.btn:active{transform:translateY(1px)}
 
-  /* joint grid */
-  .board { display: grid; grid-template-columns: 84px repeat(3, 1fr) 96px; gap: 6px; align-items: stretch; font-size: 12.5px; }
-  .board .hd { color: var(--muted); font-size: 11px; line-height: 1.3; text-align: center; padding: 0 2px 4px; align-self: end; }
-  .board .hd b { display: block; color: var(--ink); font-size: 12px; }
-  .board .rh { color: var(--muted); font-size: 12px; display: flex; align-items: center; gap: 6px; }
-  .board .rh i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
-  .board .cell {
-    position: relative; border: 1px solid var(--hair); border-radius: 8px; padding: 10px 8px; text-align: center;
-    overflow: hidden; background: var(--card);
-  }
-  .board .cell > i { position: absolute; inset: 0; background: var(--right); opacity: 0; }
-  .board .cell > span { position: relative; font-family: ui-monospace, Menlo, monospace; font-variant-numeric: tabular-nums; font-weight: 600; }
-  .board .marg { border-style: dashed; }
-  .board .marg > i { background: var(--acc); }
-  .board .arrow { color: var(--faint); font-size: 12px; text-align: center; align-self: center; }
-  .board .corner { color: var(--faint); font-size: 11px; text-align: center; align-self: center; line-height: 1.3; }
-  .boardnote { font-size: 12.5px; color: var(--muted); margin: 12px 0 0; line-height: 1.5; }
+.teach{background:var(--code-bg);border:1px solid var(--sheet-line);border-left:3px solid var(--tint);border-radius:8px;padding:13px 15px;margin:0 0 16px;font-size:14px;line-height:1.55}
+.teach .num{font-weight:600}
 
-  details.data { margin-top: 16px; }
-  details.data summary { cursor: pointer; font-size: 13px; color: var(--accent); font-weight: 600; }
-  .tablewrap { overflow-x: auto; margin-top: 12px; }
-  table { border-collapse: collapse; width: 100%; font-size: 12.5px; }
-  th, td { text-align: right; padding: 5px 9px; border-bottom: 1px solid var(--hair); white-space: nowrap; }
-  th:first-child, td:first-child { text-align: left; }
-  td.mono, th.mono { font-family: ui-monospace, Menlo, monospace; font-variant-numeric: tabular-nums; }
-  thead th { color: var(--faint); font-weight: 600; font-size: 11px; letter-spacing: .04em; text-transform: uppercase; }
+.chart{position:relative}
+.chart svg{display:block;width:100%;height:auto}
+.clab{font-family:var(--f-mono);font-size:10px;fill:var(--ink3)}
+.cend{font-family:var(--f-mono);font-size:10.5px;fill:var(--ink2)}
+.legend{display:flex;gap:8px 14px;margin-top:8px;font-size:12.5px;color:var(--ink2);flex-wrap:wrap}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:50%;display:inline-block;flex:none}
+.legend i.line{width:16px;height:0;border-top:2px solid;border-radius:0}
+.legend i.dash{width:16px;height:0;border-top:2px dashed;border-radius:0}
+.legend i.ring{background:transparent;border:2px solid var(--ink2)}
+.caption{font-size:13.5px;color:var(--ink2);margin:10px 0 0;line-height:1.5;max-width:76ch}
+.caption b{color:var(--ink);font-weight:600}
 
-  footer { margin-top: 28px; color: var(--faint); font-size: 12px; line-height: 1.6; max-width: 80ch; }
-  footer code { font-family: ui-monospace, Menlo, monospace; color: var(--muted); }
-  footer ol { padding-left: 18px; margin: 8px 0 0; }
+/* reading order: numbered like code lines */
+.howto{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0 0 16px}
+.howto div{border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.45;color:var(--ink2);min-width:0}
+.howto div b{display:block;color:var(--ink);font-size:12.5px;margin-bottom:3px}
+.ytitle{font-family:var(--f-body);font-size:10.5px;fill:var(--ink2)}
+.band{font-family:var(--f-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;fill:var(--ink2)}
 
-  @media (max-width: 860px) {
-    .tiles { grid-template-columns: repeat(2, 1fr); }
-    .grid2 { grid-template-columns: 1fr; }
-    .board { grid-template-columns: 64px repeat(3, 1fr) 72px; font-size: 11.5px; }
-    .howto { grid-template-columns: repeat(2, 1fr); }
-  }
-  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+.tooltip{position:fixed;pointer-events:none;z-index:20;opacity:0;transition:opacity .08s;background:var(--card);border-radius:9px;padding:8px 10px;font-size:12.5px;min-width:190px;max-width:calc(100vw - 16px)}
+.tooltip .tt-h{font-family:var(--f-mono);font-size:11px;color:var(--ink3);margin-bottom:5px}
+.tooltip .tt-r{display:flex;justify-content:space-between;gap:14px;align-items:center}
+.tooltip .tt-r .k{display:inline-flex;align-items:center;gap:6px;color:var(--ink2)}
+.tooltip .tt-r .k i{width:12px;height:0;border-top:2px solid;display:inline-block}
+.tooltip .tt-r .v{font-family:var(--f-mono);font-variant-numeric:tabular-nums;font-weight:600}
+.tooltip hr{border:0;border-top:1px solid var(--sheet-line);margin:5px 0}
+
+/* joint grid */
+.board{display:grid;grid-template-columns:84px repeat(3,minmax(0,1fr)) 96px;gap:6px;align-items:stretch;font-size:12.5px}
+.board .hd{color:var(--ink2);font-size:11px;line-height:1.3;text-align:center;padding:0 2px 4px;align-self:end}
+.board .hd b{display:block;color:var(--ink);font-size:12px}
+.board .rh{color:var(--ink2);font-size:12px;display:flex;align-items:center;gap:6px}
+.board .rh i{width:9px;height:9px;border-radius:50%;display:inline-block;flex:none}
+.board .cell{position:relative;border-radius:8px;padding:10px 6px;text-align:center;overflow:hidden;min-width:0}
+.board .cell>i{position:absolute;inset:0;background:var(--right);opacity:0}
+.board .cell>span{position:relative;font-family:var(--f-mono);font-variant-numeric:tabular-nums;font-weight:600}
+.board .marg{border:1.5px dashed var(--sheet-line)}
+.board .marg>i{background:var(--acc)}
+.board .arrow{color:var(--ink3);font-size:12px;text-align:center;align-self:center}
+.board .corner{color:var(--ink3);font-family:var(--f-mono);font-size:11px;text-align:center;align-self:center;line-height:1.3}
+.boardnote{font-size:13px;color:var(--ink2);margin:12px 0 0;line-height:1.5}
+
+details.data{margin-top:16px}
+details.data summary{cursor:pointer;font-size:13.5px;color:var(--tint-ink);font-weight:600;min-height:32px;display:list-item}
+.tablewrap{overflow-x:auto;margin-top:12px;background:var(--code-bg);border:1px solid var(--sheet-line);border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:12.5px;font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+th,td{text-align:right;padding:6px 10px;border-bottom:1px solid var(--sheet-line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left;color:var(--ink3)}
+thead th{color:var(--ink3);font-weight:600;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase}
+
+/* footer: the five steps as a numbered code block */
+footer{margin-top:28px;color:var(--ink2);font-size:13px;line-height:1.6;background:var(--code-bg);border:1px solid var(--sheet-line);border-radius:8px;padding:12px 14px 12px}
+footer code{font-family:var(--f-mono);color:var(--tint-ink)}
+footer ol{list-style:none;counter-reset:ln;padding:0;margin:10px -14px 0;font-size:13px}
+footer ol li{counter-increment:ln;position:relative;padding:3px 14px 3px calc(14px + 2.6em)}
+footer ol li:nth-child(odd){background:color-mix(in srgb,var(--code-hl) 45%,transparent)}
+footer ol li::before{content:counter(ln);position:absolute;left:14px;width:2.6em;font-family:var(--f-mono);color:var(--ink3)}
+
+@media (max-width:860px){
+  .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .grid2{grid-template-columns:minmax(0,1fr)}
+  .board{grid-template-columns:60px repeat(3,minmax(0,1fr)) 66px;font-size:11.5px;gap:4px}
+  .howto{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:520px){
+  .panel{padding:16px}
+  .tile{padding:12px}
+  .tile .val{font-size:22px}
+  .board{grid-template-columns:52px repeat(3,minmax(0,1fr)) 58px;font-size:11px}
+  .board .cell{padding:8px 2px}
+  .board .hd{font-size:10px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
+</head><body>
 
 <div class="wrap">
   <header class="top">
-    <p class="eyebrow"><a href="index.html" style="color:inherit">&larr; Priors and Prejudice</a> &middot; Bayesian observer</p>
+    <p class="eyebrow"><a href="index.html" style="color:inherit">&larr; Priors and Prejudice</a> &middot; <span class="enamel"><span>Bayesian observer</span></span></p>
     <h1>Block Belief Machine</h1>
     <p class="lede">A simulated mouse watches a drifting grating each trial and licks left or right. It has to learn two things at once: which way this grating moves, and which kind of block it is living in. Move the world's knobs and the observer's knobs separately and watch both beliefs move.</p>
   </header>
@@ -267,7 +221,7 @@
       <div class="envbar" aria-hidden="true"><i class="r" id="eb-r"></i><i class="u" id="eb-u"></i><i class="l" id="eb-l"></i></div>
     </div>
     <div class="tile">
-      <p class="lbl">Trials to 90% block belief</p>
+      <p class="lbl">Trials to learn the block &middot; pi within 0.05 for 5 trials</p>
       <div class="val" id="t-t90">&middot;</div>
       <div class="sub" id="t-t90-sub">&middot;</div>
     </div>
@@ -286,7 +240,7 @@
   <div class="grid2">
     <div>
       <div class="panel world" aria-label="World controls">
-        <h2>World <span class="hint">generative side</span></h2>
+        <h2><span class="enamel w"><span>World</span></span> <span class="hint">generative side</span></h2>
 
         <div class="ctrl">
           <div class="row"><label for="s-pr">Block bias &middot; P(stimulus is right)</label><span class="rdval mono" id="v-pr">80%</span></div>
@@ -305,7 +259,7 @@
         <div class="ctrl">
           <div class="row"><label for="s-c">Contrast</label><span class="rdval mono" id="v-c">0.125</span></div>
           <div class="seg full" role="group" aria-label="Contrast mode" style="margin-bottom:9px">
-            <button id="cm-fixed" class="on">One fixed level</button><button id="cm-table">Lab table</button>
+            <button id="cm-fixed" class="on">One fixed level</button><button id="cm-table">Task mix</button>
           </div>
           <input type="range" id="s-c" min="0" max="1" value="0.125" step="0.0125">
           <div class="note" id="c-note">Every trial uses this contrast. Slide it to see what weak and strong evidence do.</div>
@@ -314,33 +268,46 @@
         <div class="ctrl">
           <div class="row"><label for="s-z">Sensory noise &zeta;</label><span class="rdval mono" id="v-z">1.00</span></div>
           <input type="range" id="s-z" min="0.05" max="2" value="1" step="0.05">
-          <div class="note">The observation is <span class="mono">m = stim &times; contrast + &zeta; &times; noise</span>. What matters is contrast &divide; &zeta;.</div>
+          <div class="note">The observation is <span class="mono">m = stim &times; contrast + &zeta; &times; noise</span>. What matters is contrast &divide; &zeta;. &zeta; = 0.25 is like a trained mouse: about 100% right at full contrast, about 60% at the lowest.</div>
         </div>
 
         <div class="ctrl">
           <label class="check"><input type="checkbox" id="sw-on"> Switch block mid-run</label>
           <div id="sw-body" hidden>
             <div class="row" style="margin-top:10px"><label for="s-swat">New block starts at trial</label><span class="rdval mono" id="v-swat">20</span></div>
-            <input type="range" id="s-swat" min="2" max="40" value="20" step="1">
+            <input type="range" id="s-swat" min="2" max="150" value="20" step="1">
             <div class="row" style="margin-top:10px"><label for="s-pr2">New block bias &middot; P(right)</label><span class="rdval mono" id="v-pr2">20%</span></div>
             <input type="range" class="bias" id="s-pr2" min="1" max="99" value="20" step="1">
-            <div class="note">The observer is not told. Watch how many trials the block belief takes to flip.</div>
+            <div class="note">The observer is not told. Watch how many trials the block belief takes to flip. Try 80 / 20 to 20 / 80 with hazard 0, then with hazard 1/50.</div>
           </div>
         </div>
       </div>
 
       <div class="panel observer" aria-label="Observer controls">
-        <h2>Observer <span class="hint">inference side</span></h2>
+        <h2><span class="enamel m"><span>Observer</span></span> <span class="hint">inference side</span></h2>
         <div class="ctrl">
           <div class="row"><label for="s-b">&beta; &middot; how biased it assumes a biased block is</label><span class="rdval mono" id="v-b">0.80</span></div>
           <input type="range" id="s-b" min="0.5" max="0.99" value="0.8" step="0.01">
           <div class="seg full" role="group" aria-label="Beta presets" style="margin-top:9px">
-            <button data-b="0.8" class="on">&beta; = 0.80</button><button data-b="0.55">&beta; = 0.55</button>
+            <button data-b="0.8" class="on">Matched &beta; = 0.80</button><button data-b="0.55">Weak &beta; = 0.55</button>
           </div>
           <div class="note">Block likelihoods: P(right | R-biased) = &beta;, P(right | unbiased) = 0.5, P(right | L-biased) = 1 &minus; &beta;. Block prior starts flat at 1/3 each.</div>
         </div>
         <div class="ctrl">
-          <div class="note">The observer shares the world's &zeta; and uses &sigma; = <span class="mono" id="v-sigma">0.49</span>, the spread of the nine signed contrast levels, as its contrast prior. Both fixed, as in the task design.</div>
+          <div class="row"><label for="s-h">Hazard h &middot; chance it thinks the block switches each trial</label><span class="rdval mono" id="v-h">0.020</span></div>
+          <input type="range" id="s-h" min="0" max="0.1" value="0.02" step="0.005">
+          <div class="seg full" role="group" aria-label="Hazard presets" style="margin-top:9px">
+            <button data-h="0">h = 0 &middot; never switches</button><button data-h="0.02" class="on">h = 1/50 &middot; task's blocks</button>
+          </div>
+          <div class="note">Before each trial the observer keeps 1 &minus; h of each block belief and spreads h over the other two blocks (<span class="mono">predict_block</span>). With h = 0 it can get stuck after a reversal. The task's blocks average about 50 trials, so h = 1/50.</div>
+        </div>
+        <div class="ctrl">
+          <div class="row"><label for="s-l">Lapse &middot; chance of a random lick</label><span class="rdval mono" id="v-l">0.02</span></div>
+          <input type="range" id="s-l" min="0" max="0.1" value="0.02" step="0.01">
+          <div class="note">With this chance the lick is a coin flip, whatever the mouse believes (<span class="mono">apply_lapse</span>). Real mice do this; it keeps accuracy below 100%.</div>
+        </div>
+        <div class="ctrl">
+          <div class="note">The observer shares the world's &zeta; and uses &sigma; = <span class="mono" id="v-sigma">0.49</span>, the spread of the nine signed contrast levels, as its contrast prior. Both fixed.</div>
         </div>
       </div>
 
@@ -385,7 +352,7 @@
           <span><i class="line" style="border-color:var(--left)"></i>P(I am in an L-biased block)</span>
           <span id="lg-block-avg" hidden><i class="line" style="border-color:var(--faint);opacity:.5"></i>faint = this one sample, solid = mean of 500</span>
         </div>
-        <p class="caption"><b>How to read it.</b> Three lines, one per kind of block the mouse might be in. Height is how sure the mouse is after that trial, from 0% to 100%, and the three always add up to 100%. Trial 0 is before any evidence, all three at 33%. The line that climbs is the block it believes in. Crossing the 90% line is "sure enough," and the tile at the top counts how many trials that took.</p>
+        <p class="caption"><b>How to read it.</b> Three lines, one per kind of block the mouse might be in. Height is how sure the mouse is after that trial, from 0% to 100%, and the three always add up to 100%. Trial 0 is before any evidence, all three at 33%. The line that climbs is the block it believes in. The dashed 90% line is a reference. The tile at the top counts trials until the prior settles (within 0.05 of where it ends up, for 5 trials in a row).</p>
       </div>
 
       <div class="panel">
@@ -393,9 +360,9 @@
         <div class="chart" id="c-dir"></div>
         <div class="legend" id="lg-dir">
           <span><i class="line" style="border-color:var(--muted);opacity:.7"></i>Gray = prior &pi;, P(right) before looking, straight from the block belief</span>
-          <span><i class="line" style="border-color:var(--right)"></i>Teal = posterior, P(right) after seeing m</span>
+          <span><i class="line" style="border-color:var(--right)"></i>Blue = posterior, P(right) after seeing m</span>
         </div>
-        <p class="caption" id="cap-dir"><b>How to read it.</b> Both lines answer "how likely is it that this trial's grating moved right." Gray is the expectation before looking, which is just the block belief from the graph above turned into a lean. Teal is after seeing m. Above 50% the mouse licks right, below 50% it licks left. Teal hugging gray means the mouse is trusting the block; teal jumping away from gray means the observation won.</p>
+        <p class="caption" id="cap-dir"><b>How to read it.</b> Both lines answer "how likely is it that this trial's grating moved right." Gray is the expectation before looking, which is just the block belief from the graph above turned into a lean. Blue is after seeing m. Above 50% the mouse licks right, below 50% it licks left. Blue hugging gray means the mouse is trusting the block; blue jumping away from gray means the observation won.</p>
         <div class="legend" id="lg-acc" hidden>
           <span><i class="line" style="border-color:var(--acc)"></i>Mean accuracy at each trial, 500 runs</span>
         </div>
@@ -406,11 +373,11 @@
           <span><i style="background:var(--warn)"></i>Wrong lick</span>
           <span style="color:var(--faint)">top row = licked right, bottom row = licked left</span>
         </div>
-        <p class="caption"><b>Licks.</b> One dot per trial. Top row it licked right, bottom row it licked left. Green means that lick matched the true direction, amber means it did not.</p>
+        <p class="caption"><b>Licks.</b> One dot per trial. Top row it licked right, bottom row it licked left. Green means that lick matched the true direction, red means it did not.</p>
       </div>
 
       <div class="panel">
-        <h2>One trial as a grid <span class="hint">joint posterior for one trial</span></h2>
+        <h2>The grid <span class="hint">joint posterior for one trial</span></h2>
         <div class="ctrl" style="margin-bottom:14px">
           <div class="row"><label for="s-insp">Inspect trial</label><span class="rdval mono" id="v-insp">40</span></div>
           <input type="range" id="s-insp" min="1" max="40" value="40" step="1">
@@ -433,13 +400,14 @@
   </div>
 
   <footer>
-    Ideal-observer model by Alyssa Romportl (Eissa and Felsen labs, University of Colorado Anschutz), built as an interactive by Raven Spellman for the ABRCMS 2026 poster <em>Priors and Prejudice</em>. A simulation for building intuition, no animal data involved. The five steps, per trial:
+    The Bayesian observer from the poster (model from the Eissa and Felsen labs). A toy simulation for building intuition, no lab data involved. The steps, per trial:
     <ol>
       <li>Block belief before the trial (flat 1/3 each on trial 1, then last trial's posterior).</li>
       <li>Prior for right: &pi; = &beta;&middot;P(R-biased) + 0.5&middot;P(unbiased) + (1 &minus; &beta;)&middot;P(L-biased).</li>
-      <li>Observation m drawn from Normal(stimulus &times; contrast, &zeta;&sup2;). Contrast is either the fixed level or drawn from the lab table (0, 0.0625, 0.125, 0.25, 1 with probabilities 0.1, 0.3, 0.3, 0.2, 0.1).</li>
+      <li>Observation m drawn from Normal(stimulus &times; contrast, &zeta;&sup2;). Contrast is either the fixed level or drawn from the task mix (0, 0.0625, 0.125, 0.25, 1 with probabilities 0.1, 0.3, 0.3, 0.2, 0.1).</li>
       <li>Likelihood of right = &Phi;(&mu;* / &sigma;*) with &mu;* = &zeta;<sup>&minus;2</sup>m / (&sigma;<sup>&minus;2</sup> + &zeta;<sup>&minus;2</sup>) and &sigma;* = (&sigma;<sup>&minus;2</sup> + &zeta;<sup>&minus;2</sup>)<sup>&minus;1/2</sup>; posterior by Bayes' rule with &pi;.</li>
-      <li>Lick the side with the larger posterior (LLR sign). Then, after feedback, update the block belief with the true stimulus using &beta;, 0.5, 1 &minus; &beta;.</li>
+      <li>Lick the side with the larger posterior (LLR sign). Then, after feedback, update the block belief with the true stimulus using &beta;, 0.5, 1 &minus; &beta;. A small share of licks (the lapse rate) are random.</li>
+      <li>Before the next trial, allow for a switch: keep 1 &minus; h of each block belief and spread h over the other two. Learned = the prior &pi; stays within 0.05 of where it settles for that block for 5 trials in a row.</li>
     </ol>
   </footer>
 </div>
@@ -449,7 +417,7 @@
 (function () {
   "use strict";
 
-  // ---- model constants ----
+  // ---- constants ----
   var C_SIGNED = [-1, -0.25, -0.125, -0.0625, 0, 0.0625, 0.125, 0.25, 1];
   var SIGMA = Math.sqrt(C_SIGNED.reduce(function (s, c) { return s + c * c / 9; }, 0));
   var C_LEVELS = [0, 0.0625, 0.125, 0.25, 1];
@@ -460,7 +428,7 @@
   var st = {
     pRight: 0.80, n: 40, cMode: "fixed", cFixed: 0.125, zeta: 1.0,
     switchOn: false, switchAt: 20, pRight2: 0.20,
-    beta: 0.80, avg: false, inspect: 40, seed: 20260901
+    beta: 0.80, hazard: 0.02, lapse: 0.02, avg: false, inspect: 40, seed: 20260901
   };
   var hoverIdx = null;
 
@@ -523,32 +491,69 @@
     return [u[0] / Z, u[1] / Z, u[2] / Z];
   }
 
+  // ---- observer side: before the next trial, allow for a block switch (predict_block) ----
+  // keep (1 - h) of each belief and spread h of it evenly over the other two blocks
+  function predictBlock(pb) {
+    var h = st.hazard;
+    return [
+      (1 - h) * pb[0] + (h / 2) * (pb[1] + pb[2]),
+      (1 - h) * pb[1] + (h / 2) * (pb[0] + pb[2]),
+      (1 - h) * pb[2] + (h / 2) * (pb[0] + pb[1])
+    ];
+  }
+
   function simulate(seed) {
     var rng = mulberry32(seed), gauss = makeGauss(rng);
+    var lrng = mulberry32((seed ^ 0x9E3779B9) >>> 0);   // lapses get their own dice, so the world holds still
     var pb = [1 / 3, 1 / 3, 1 / 3];
-    var out = { stim: [], c: [], m: [], pi: [], postR: [], choice: [], correct: [], PB: [pb.slice()] };
+    var out = { stim: [], c: [], m: [], pi: [], postR: [], choice: [], correct: [], PB: [pb.slice()], PBin: [pb.slice()] };
     for (var t = 0; t < st.n; t++) {
       var w = generateTrial(rng, gauss, pRightAt(t));
       var o = observeDirection(w.m, pb);
       var pr = clamp(o.postR, 1e-12, 1 - 1e-12);
       var llr = Math.log(pr / (1 - pr));
       var ch = llr > 1e-9 ? 1 : (llr < -1e-9 ? -1 : (rng() < 0.5 ? 1 : -1));
+      if (lrng() < st.lapse) ch = lrng() < 0.5 ? 1 : -1;   // apply_lapse: a random lick, whatever it believes
       out.stim.push(w.stim); out.c.push(w.c); out.m.push(w.m);
       out.pi.push(o.pi); out.postR.push(o.postR); out.choice.push(ch); out.correct.push(ch === w.stim ? 1 : 0);
       pb = updateBlock(w.stim, pb);
-      out.PB.push(pb.slice());
+      out.PB.push(pb.slice());        // belief after feedback
+      pb = predictBlock(pb);
+      out.PBin.push(pb.slice());      // belief carried into the next trial
     }
     return out;
   }
 
-  // trials until P(true block) >= 0.9, counted from the block's first trial (1-indexed start)
-  function trialsTo90(PB, blockIdx, startTrial) {
-    for (var k = startTrial; k <= st.n; k++) if (PB[k][blockIdx] >= 0.9) return k - startTrial + 1;
+  // "learned": the prior pi is within 0.05 of where it settles
+  // for this block, 5 trials in a row. Counted from the block's first trial (1-indexed start);
+  // returns the trial where that run of 5 started.
+  var LEARN_MARGIN = 0.05, LEARN_HOLD = 5, settledCache = {};
+  function priorOf(pb) { return st.beta * pb[0] + 0.5 * pb[1] + (1 - st.beta) * pb[2]; }
+  function settledPi(pR) {
+    // where pi levels off in a long run of one block (median after warm-up), like settled_pi
+    var key = pR + "|" + st.beta + "|" + st.hazard;
+    if (settledCache[key] !== undefined) return settledCache[key];
+    var rng = mulberry32(12345), pb = [1 / 3, 1 / 3, 1 / 3], pis = [];
+    for (var n = 0; n < 20000; n++) {
+      var stim = rng() < pR ? 1 : -1;
+      pb = predictBlock(updateBlock(stim, pb));
+      if (n >= 200) pis.push(priorOf(pb));
+    }
+    pis.sort(function (a, b) { return a - b; });
+    var m = pis.length % 2 ? pis[(pis.length - 1) / 2] : (pis[pis.length / 2 - 1] + pis[pis.length / 2]) / 2;
+    return (settledCache[key] = m);
+  }
+  function trialsToLearn(sim, pR, startTrial) {
+    var target = settledPi(pR), run = 0;
+    for (var k = startTrial; k <= st.n; k++) {
+      run = Math.abs(priorOf(sim.PBin[k]) - target) <= LEARN_MARGIN ? run + 1 : 0;
+      if (run === LEARN_HOLD) return k - startTrial + 1 - LEARN_HOLD + 1;
+    }
     return null;
   }
   function t90ForRun(sim) {
-    if (st.switchOn) return trialsTo90(sim.PB, trueBlock(st.pRight2), st.switchAt);
-    return trialsTo90(sim.PB, trueBlock(st.pRight), 1);
+    if (st.switchOn) return trialsToLearn(sim, st.pRight2, st.switchAt);
+    return trialsToLearn(sim, st.pRight, 1);
   }
 
   function simulateMany() {
@@ -809,7 +814,7 @@
   var BLOCK_NAMES = ["R-biased", "unbiased", "L-biased"];
   function renderBoard(i) {
     var sim = lastSim, t = i - 1;
-    var pb = sim.PB[t];                 // block belief before this trial
+    var pb = sim.PBin[t];               // block belief carried into this trial (after the hazard step)
     var o = observeDirection(sim.m[t], pb);
     var pRb = [st.beta, 0.5, 1 - st.beta];
     var J = [[0, 0, 0], [0, 0, 0]], Z = 0;
@@ -849,8 +854,9 @@
     note.textContent = "Each cell is P(direction, block | m) for this trial, from the block belief carried in (" +
       pct(pb[0]) + " R-biased, " + pct(pb[1]) + " unbiased, " + pct(pb[2]) + " L-biased). " +
       "Summing across a row gives the direction posterior the model licks on: P(right | m) = " + pct(rowSum[0]) + ". " +
-      "Summing down a column is what the observation alone says about the block; the model then updates the block belief with the true stimulus after feedback (" +
-      (sim.stim[t] === 1 ? "right" : "left") + " here), landing at " + pct(sim.PB[i][0]) + " R-biased.";
+      "Summing down a column is what the observation alone says about the block; the observer then updates the block belief with the true stimulus after feedback (" +
+      (sim.stim[t] === 1 ? "right" : "left") + " here), landing at " + pct(sim.PB[i][0]) + " R-biased" +
+      (st.hazard > 0 ? ", then moves " + (st.hazard * 100).toFixed(1) + "% of its belief toward the other blocks in case the block switches before the next trial." : ".");
   }
 
   // ---- teaching strip ----
@@ -864,13 +870,16 @@
         (snr < 0.8 ? "That is middling evidence: prior and observation share the decision, which is where block bias shows up as a tilt in the errors." :
           "That is strong evidence, so the observation overrides the prior and accuracy stays high whatever the block is.");
     } else {
-      snrTxt = "Contrast is drawn from the lab table each trial: 10% of trials at 0 (pure guess from the prior), 60% at 0.0625 or 0.125, 20% at 0.25, 10% at 1.";
+      snrTxt = "Contrast is drawn from the task mix each trial: 10% of trials at 0 (pure guess from the prior), 60% at 0.0625 or 0.125, 20% at 0.25, 10% at 1.";
       verdict = "With \u03b6 = " + st.zeta.toFixed(2) + ", most trials are weak evidence, so the block bias matters on most trials.";
     }
     var pRtxt = "The world's block is " + Math.round(st.pRight * 100) + "% right; the observer assumes a biased block is " + Math.round(st.beta * 100) + "% (\u03b2)" +
       (Math.abs(st.pRight - st.beta) > 0.02 && Math.abs((1 - st.pRight) - st.beta) > 0.02 && st.pRight !== 0.5 ? ", so its picture of the block is off from the truth." : ".");
     teach.innerHTML = "";
-    teach.appendChild(document.createTextNode(snrTxt + " " + verdict + " " + pRtxt));
+    var hzTxt = st.hazard > 0 ?
+      " With hazard h = " + st.hazard.toFixed(3) + " the observer expects a switch about every " + Math.round(1 / st.hazard) + " trials, so it never gets completely sure and can notice a switch." :
+      " With hazard h = 0 the observer assumes the block never changes, so after a long block it can get stuck when the block switches.";
+    teach.appendChild(document.createTextNode(snrTxt + " " + verdict + " " + pRtxt + hzTxt));
   }
 
   // ---- tiles ----
@@ -890,13 +899,14 @@
     document.getElementById("eb-l").style.width = (last[2] * 100) + "%";
 
     var t90 = t90ForRun(sim);
-    var from = st.switchOn ? "after the switch at trial " + st.switchAt : "from a flat start";
+    var from = (st.switchOn ? "after the switch at trial " + st.switchAt : "from a flat start") +
+      " \u00b7 pi settles at " + settledPi(st.switchOn ? st.pRight2 : st.pRight).toFixed(3);
     if (avg) {
       document.getElementById("t-t90").textContent = avg.t90median === null ? "never" : avg.t90median + " median";
-      document.getElementById("t-t90-sub").textContent = avg.t90mean === null ? "no run reached 90% " + from : "mean " + avg.t90mean.toFixed(1) + " \u00b7 " + Math.round(avg.reachedFrac * 100) + "% of runs reached it " + from;
+      document.getElementById("t-t90-sub").textContent = avg.t90mean === null ? "no run stabilized " + from : "mean " + avg.t90mean.toFixed(1) + " \u00b7 " + Math.round(avg.reachedFrac * 100) + "% of runs reached it " + from;
     } else {
       document.getElementById("t-t90").textContent = t90 === null ? "not yet" : t90 + " trials";
-      document.getElementById("t-t90-sub").textContent = (t90 === null ? "did not reach 90% within the run, " : "") + from;
+      document.getElementById("t-t90-sub").textContent = (t90 === null ? "pi did not stabilize within the run, " : "") + from;
     }
 
     var acc = sim.correct.reduce(function (a, b) { return a + b; }, 0) / st.n;
@@ -965,7 +975,7 @@
         { vals: pbL, color: "var(--left)", label: "L-biased block" }
       ];
     }
-    drawLines("c-block", blockSeries, { aria: "Posterior probability of each block type after each trial", hline: 0.9, hlineLabel: "90% = sure enough", yTitle: "how sure the mouse is" });
+    drawLines("c-block", blockSeries, { aria: "Posterior probability of each block type after each trial", hline: 0.9, hlineLabel: "90%", yTitle: "how sure the mouse is" });
     document.getElementById("lg-block-avg").hidden = !avg;
 
     if (avg) {
@@ -1035,7 +1045,7 @@
     $("s-c").disabled = mode === "table";
     $("v-c").textContent = mode === "table" ? "table" : st.cFixed.toFixed(4);
     $("c-note").textContent = mode === "table"
-      ? "Each trial draws 0, 0.0625, 0.125, 0.25 or 1 with probabilities 0.1, 0.3, 0.3, 0.2, 0.1, as in the task design."
+      ? "Each trial draws 0, 0.0625, 0.125, 0.25 or 1 with probabilities 0.1, 0.3, 0.3, 0.2, 0.1."
       : "Every trial uses this contrast. Slide it to see what weak and strong evidence do.";
     updateTeach(); render();
   }
@@ -1064,6 +1074,24 @@
       $("s-b").dispatchEvent(new Event("input"));
     });
   });
+  function setHazardButtons() {
+    Array.prototype.forEach.call(document.querySelectorAll("button[data-h]"), function (b) {
+      b.classList.toggle("on", Math.abs(st.hazard - +b.getAttribute("data-h")) < 1e-9);
+    });
+  }
+  $("s-l").addEventListener("input", function () {
+    st.lapse = +this.value; $("v-l").textContent = st.lapse.toFixed(2); render();
+  });
+  $("s-h").addEventListener("input", function () {
+    st.hazard = +this.value; $("v-h").textContent = st.hazard.toFixed(3);
+    setHazardButtons(); updateTeach(); render();
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("button[data-h]"), function (b) {
+    b.addEventListener("click", function () {
+      $("s-h").value = b.getAttribute("data-h");
+      $("s-h").dispatchEvent(new Event("input"));
+    });
+  });
   $("avg-on").addEventListener("change", function () { st.avg = this.checked; render(); });
   $("redraw").addEventListener("click", function () {
     st.seed = (st.seed * 1664525 + 1013904223) >>> 0;
@@ -1082,71 +1110,4 @@
 })();
 </script>
 
-<!-- wetlab theme -->
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap">
-<style>
-/* ===== Wet Lab day room, liquid: Teal. Day only, to match the printed poster ===== */
-:root,:root:not([data-theme="light"]),:root[data-theme="dark"]{
-  --paper:#dde8ef; --card:#fdfefd; --ink:#0e2233; --muted:#3a5264; --faint:#5a6b78;
-  --hair:#d5dbe0; --hair-strong:#aeb6bd; --accent:#35a3a0; --accent-soft:rgba(53,163,160,.16);
-  --ok:#1f7a77; --warn:#b9313d; --grid:#dde5ea;
-  --right:#35a3a0; --left:#0e2233; --unb:#7f93a6; --acc:#1f7a77;
-  --right-soft:rgba(53,163,160,.16); --left-soft:rgba(14,34,51,.10); --unb-soft:rgba(127,147,166,.16);
-  --wall-a:#eef4f7; --wall-b:#dde8ef; --grout:rgba(110,145,165,.2); --line:#0e2233; --sheet-b:#f2f5f6;
-  --key:#0e2233; --on-key:#fdfefd;
-  --shadow:0 0 0 1px #aeb6bd,0 10px 24px rgba(14,34,51,.12);
-  color-scheme:light;
-}
-
-body{font-family:'Geist',system-ui,-apple-system,'Segoe UI',sans-serif;
-  background:linear-gradient(var(--grout) 1px,transparent 1px) 0 0/80px 80px,linear-gradient(90deg,var(--grout) 1px,transparent 1px) 0 0/80px 80px,linear-gradient(180deg,var(--wall-a),var(--wall-b)) fixed;
-  background-color:var(--paper)}
-.mono,.clab,.cend,.band,.tooltip .tt-h,.tooltip .tt-r .v,td.mono,th.mono,.board .cell>span{font-family:'Geist Mono',ui-monospace,Menlo,monospace}
-.eyebrow{font-family:'Geist Mono',ui-monospace,monospace;color:var(--muted);letter-spacing:.3em}
-.eyebrow a{text-decoration:none;border-bottom:1.5px solid var(--accent)}
-h1{font-family:'Geist',system-ui,sans-serif;font-weight:700;letter-spacing:-.04em;font-size:clamp(32px,6vw,52px);line-height:1}
-.lede{font-size:15.5px}
-header.top::after{content:"";display:block;height:14px;margin-top:22px;border-radius:4px;
-  background:radial-gradient(circle,rgba(255,255,255,.18) 0 1px,transparent 1.6px) 0 0/6px 6px,linear-gradient(180deg,#8d9aa4,#5c6973 45%,#353f48);box-shadow:0 10px 14px -6px rgba(14,34,51,.35)}
-
-/* enamel sheets with the navy inner line */
-.panel,.tile{position:relative;border:0;border-radius:16px;background:linear-gradient(180deg,var(--card),var(--sheet-b));box-shadow:var(--shadow)}
-.panel::before,.tile::before{content:"";position:absolute;inset:7px;border:1.5px solid var(--line);border-radius:10px;pointer-events:none;opacity:.9}
-.panel{padding:22px 20px}
-.tile{padding:16px 17px}
-.panel>*,.tile>*{position:relative}
-.panel h2{display:inline-flex;font-family:'Geist',sans-serif;font-weight:600;letter-spacing:.16em;color:var(--ink);font-size:12px}
-.panel.world h2,.panel.observer h2{color:var(--ink)}
-.panel h2 .hint{letter-spacing:0}
-.tile .lbl{font-family:'Geist Mono',monospace;letter-spacing:.12em;color:var(--muted)}
-.tile .val{font-family:'Geist Mono',monospace;font-weight:600;letter-spacing:-.02em}
-.envbar>.r{background:var(--right)}.envbar>.u{background:var(--unb)}.envbar>.l{background:var(--left)}
-
-/* reading-order strip and teaching note: paper, like the Notes */
-.howto div{background:var(--card);border:0;box-shadow:0 0 0 1px var(--hair-strong);border-radius:10px}
-.howto div b{font-family:'Geist Mono',monospace;font-weight:600;letter-spacing:.04em}
-.teach{background:var(--accent-soft);border:1.5px solid color-mix(in srgb,var(--accent) 45%,transparent);border-radius:12px}
-
-/* controls: chrome beads on glass tubes, enamel keys, a navy primary key */
-input[type="range"]{height:8px;border-radius:5px;background:linear-gradient(90deg,rgba(255,255,255,.6),rgba(205,226,240,.25) 50%,rgba(255,255,255,.5)),var(--hair);box-shadow:inset 0 0 0 1px var(--hair-strong)}
-input[type="range"]::-webkit-slider-thumb{width:22px;height:22px;border:0;background:radial-gradient(circle at 35% 30%,#fff 0 18%,#d5dbe0 45%,#8f9aa3 100%);box-shadow:0 2px 5px rgba(0,20,40,.45)}
-input[type="range"]::-moz-range-thumb{width:22px;height:22px;border:0;background:radial-gradient(circle at 35% 30%,#fff 0 18%,#d5dbe0 45%,#8f9aa3 100%);box-shadow:0 2px 5px rgba(0,20,40,.45)}
-input[type="range"].bias{background:linear-gradient(90deg,var(--left),var(--hair-strong) 50%,var(--right))}
-.biasfill>.l{background:var(--left)}.biasfill>.r{background:var(--right)}
-.seg{border:0;border-radius:9px;box-shadow:inset 0 0 0 1.5px var(--line);overflow:hidden}
-.seg button{font-family:'Geist',sans-serif;letter-spacing:.02em}
-.seg button.on{background:var(--key);color:var(--on-key)}
-.btn{background:var(--key);color:var(--on-key);border-radius:12px;letter-spacing:.02em;box-shadow:0 4px 10px rgba(14,34,51,.25)}
-.btn:focus-visible{outline:2.5px solid var(--accent)}
-.check input{accent-color:var(--accent)}
-details.data summary{color:var(--ink);font-family:'Geist Mono',monospace;border-bottom:1.5px solid var(--accent);display:inline-block}
-
-/* the joint grid: each cell a vial filled with the liquid */
-.board .cell{border:0;border-radius:8px 8px 12px 12px;background:linear-gradient(90deg,rgba(255,255,255,.55),rgba(205,226,240,.2) 45%,rgba(255,255,255,.45));box-shadow:inset 0 0 0 1.5px var(--hair-strong)}
-.board .cell>i{background:var(--right)}
-.board .marg{box-shadow:inset 0 0 0 1.5px var(--line);border-style:solid}
-.board .marg>i{background:var(--right)}
-.pill.ok{color:var(--ok)}.pill.warn{color:var(--warn)}
-footer{color:var(--muted)}
-</style>
 </body></html>
