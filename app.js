@@ -147,20 +147,20 @@
     var median2 = null;
     $("run2").addEventListener("click", async function () {
       if (running) return; running = true; this.disabled = true; reset();
-      var sim = M.simulate(M.seq(0, 0, MAXT, 0.8), freshSeed()), hit = null;
-      for (var t = 0; t < MAXT; t++) {
+      var sim = M.simulate(M.seq(0, 0, MAXT, 0.8), freshSeed()), hit = M.trialsToLearn(sim.PB, 0, 1);
+      var stopAt = hit ? Math.min(MAXT, hit + 4) : MAXT;   // run until the 5 steady trials are confirmed
+      for (var t = 0; t < stopAt; t++) {
         var tr = sim.trials[t], pb = sim.PB[t + 1];
         var dr = document.createElement("i"); if (tr.stim < 0) dr.className = "L"; $("drip2").appendChild(dr);
         setBel(pb); setLv($("b2liq"), (t + 1) / MAXT); $("cnt2").textContent = "trial " + (t + 1);
         await wait(230);
-        if (pb[0] >= 0.9) { hit = t + 1; break; }
       }
       var act = $("act2"); act.hidden = false;
       if (hit) { act.style.bottom = (hit / MAXT * 100) + "%"; act.querySelector("b").textContent = "took " + hit; setLv($("b2liq"), hit / MAXT); }
       else { act.style.bottom = "100%"; act.querySelector("b").textContent = "not in 40"; }
       if (median2 === null) median2 = M.runCondition(M.CONDITIONS[0], 2000, freshSeed()).median;
       var diff = hit ? Math.abs(hit - guess) : null;
-      $("res2").textContent = (hit ? "This mouse took " + hit + " trials. You guessed " + guess + (diff === 0 ? ", exactly. " : " (off by " + diff + "). ") : "This mouse wasn't sure within 40 trials. ") + "Median of 2,000 mice: " + median2 + ".";
+      $("res2").textContent = (hit ? "This mouse had learned the block by trial " + hit + ". You guessed " + guess + (diff === 0 ? ", exactly. " : " (off by " + diff + "). ") : "This mouse hadn't settled within 40 trials. ") + "Median of 2,000 mice: " + median2 + ".";
       $("ins2").hidden = false; this.disabled = false; this.textContent = "Run another mouse"; running = false;
     });
     placeClamp(); reset();
@@ -245,10 +245,10 @@
       c.addEventListener("click", function () {
         if (guessed || !sim) return; guessed = true; stop();
         var p = +c.getAttribute("data-p"), right = Math.abs(p - hidden) < 1e-9, blk = M.blockOf(hidden);
-        var obs = M.trialsTo90(sim.PB, blk, 1);
+        var obs = M.trialsToLearn(sim.PB, blk, 1);
         caps.forEach(function (x) { x.disabled = true; if (Math.abs(+x.getAttribute("data-p") - hidden) < 1e-9) x.classList.add("right"); });
         var name = { 0.8: "80/20", 0.5: "50/50", 0.2: "20/80" }[hidden];
-        $("res4").innerHTML = (right ? "<b>Right.</b> " : "<b>Not quite.</b> ") + "It was <span class=\"mono\">" + name + "</span>. You called it after <span class=\"mono\">" + t + "</span> trials. The observer was 90% sure " +
+        $("res4").innerHTML = (right ? "<b>Right.</b> " : "<b>Not quite.</b> ") + "It was <span class=\"mono\">" + name + "</span>. You called it after <span class=\"mono\">" + t + "</span> trials. The observer had learned it " +
           (obs ? (obs <= t ? "at trial <span class=\"mono\">" + obs + "</span>." : "only at trial <span class=\"mono\">" + obs + "</span>.") : "not within 40 trials.");
         $("ins4").hidden = false;
       });
@@ -265,7 +265,7 @@
     var host = $("burets"), parts = [], ran = false, XMAX = 80;
     M.CONDITIONS.forEach(function (c, i) {
       var d = document.createElement("div"); d.className = "buret";
-      d.innerHTML = '<span class="val">·</span><div class="glass"><i class="liq" style="--lv:0%"></i><i class="ticks"></i></div><canvas class="hist" width="200" height="60" aria-hidden="true"></canvas><span class="nm">' + c.label + "</span>" + (c.key === "reversal" ? '<button class="why" hidden>why?</button>' : "");
+      d.innerHTML = '<span class="val">·</span><div class="glass"><i class="liq" style="--lv:0%"></i><i class="ticks"></i></div><canvas class="hist" width="200" height="60" aria-hidden="true"></canvas><span class="nm">' + c.label + "</span>" + (c.key === "reversal" ? '<button class="why" hidden>watch one</button>' : "");
       host.appendChild(d); parts.push({ val: d.querySelector(".val"), liq: d.querySelector(".liq"), cv: d.querySelector(".hist"), why: d.querySelector(".why") });
     });
     function hist(cv, vals) {
@@ -284,7 +284,7 @@
         var r = M.runCondition(M.CONDITIONS[i], 2000, freshSeed()), p = parts[i];
         setLv(p.liq, r.median / XMAX); p.val.textContent = r.median;
         hist(p.cv, r.values);
-        if (p.why) { p.why.hidden = false; p.why.title = r.never + " of 2,000 weren't sure within 100 trials"; }
+        if (p.why) { p.why.hidden = false; p.why.title = r.never + " of 2,000 hadn't settled within 100 trials"; }
         await wait(380);
       }
       lv.classList.remove("down", "busy"); ran = true; $("ins5").hidden = false;
@@ -293,13 +293,14 @@
     parts[2].why.addEventListener("click", async function () {
       if (replaying) return; replaying = true;
       $("replay").hidden = false; $("replay").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
-      var sim = M.simulate(M.seq(19, 0.8, 100, 0.2), freshSeed());
-      for (var t = 0; t <= 119; t++) {
+      var sim = M.simulate(M.seq(50, 0.8, 100, 0.2), freshSeed()), got = M.trialsToLearn(sim.PB, 2, 51);
+      var last = got ? 50 + got + 4 : 150;
+      for (var t = 0; t <= last; t++) {
         var pb = sim.PB[t]; setBel(pb);
-        var phase = t < 20 ? "80/20 block" : "after the flip to 20/80";
-        $("cnt5").textContent = "trial " + t + " · " + phase + (t >= 20 && pb[2] >= 0.9 ? " · sure of the new block" : "");
-        if (t >= 20 && pb[2] >= 0.9) break;
-        await wait(t < 20 ? 60 : 110);
+        var phase = t <= 50 ? "80/20 block" : "after the flip to 20/80";
+        var learned = got && t >= 50 + got + 4;
+        $("cnt5").textContent = "trial " + t + " · " + phase + (learned ? " · learned the new block (settled from trial " + got + ")" : "");
+        await wait(t <= 50 ? 40 : 110);
       }
       replaying = false;
     });

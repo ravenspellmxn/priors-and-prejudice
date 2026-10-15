@@ -1,15 +1,18 @@
 /* The Bayesian observer from the poster, one copy shared by every station.
    A port of Raven's split model (SC_priors/task_bayesian_model_split.ipynb: Alyssa's fast version with the
    stimulus-sign fix): generate_session -> generateTrial, compute_prior, observe_direction, update_block, with
-   the same names below. Parameters are the poster's: 80/20 blocks, beta_obs = 0.8, noise = 1, sigma from the
-   nine signed contrasts. (The notebook's demo run uses pRight = beta_obs = 0.9.) */
+   the same names below. Parameters are the poster's: 80/20 blocks, beta_obs = 0.8, sigma from the nine signed
+   contrasts. Updated Oct 15 2026 to match the notebook: a hazard rate h = 1/50 (predict_block, the observer
+   expects a switch about every 50 trials), sensory noise 0.25 (a trained mouse), 2% random licks (lapses), and
+   "learned" = the prior pi stays within 0.05 of where it settles for that block for 5 trials (trials_to_learn). */
 (function (root) {
   "use strict";
   var C_SIGNED = [-1, -0.25, -0.125, -0.0625, 0, 0.0625, 0.125, 0.25, 1];
   var SIGMA = Math.sqrt(C_SIGNED.reduce(function (s, c) { return s + c * c / 9; }, 0));
   var C_LEVELS = [0, 0.0625, 0.125, 0.25, 1];
   var C_PROBS = [0.1, 0.3, 0.3, 0.2, 0.1];
-  var BETA = 0.8, ZETA = 1.0;
+  var BETA = 0.8, ZETA = 0.25, HAZARD = 1 / 50, LAPSE = 0.02;
+  var SETTLED = [0.768, 0.5, 0.232], MARGIN = 0.05, HOLD = 5;   // where pi settles in R, U, L at beta 0.8, h 1/50
 
   function rng(seed) {
     var a = seed >>> 0;
@@ -78,7 +81,17 @@
     var u = [lb[0] * pb[0], lb[1] * pb[1], lb[2] * pb[2]], Z = u[0] + u[1] + u[2];
     return [u[0] / Z, u[1] / Z, u[2] / Z];
   }
+  /* predict_block: before the next trial the block may have switched. Keep 1 - h of each belief and
+     spread h evenly over the other two blocks. */
+  function predictBlock(pb, h) {
+    h = h == null ? HAZARD : h;
+    return [(1 - h) * pb[0] + (h / 2) * (pb[1] + pb[2]),
+            (1 - h) * pb[1] + (h / 2) * (pb[0] + pb[2]),
+            (1 - h) * pb[2] + (h / 2) * (pb[0] + pb[1])];
+  }
   function choose(post, r) { return post > 0.5 ? 1 : (post < 0.5 ? -1 : (r() < 0.5 ? 1 : -1)); }
+  /* apply_lapse: real mice sometimes lick at random */
+  function applyLapse(ch, r, lapse) { lapse = lapse == null ? LAPSE : lapse; return r() < lapse ? (r() < 0.5 ? 1 : -1) : ch; }
 
   /* one run through a list of P(right) values, one per trial */
   function simulate(pRights, seed, opt) {
@@ -88,17 +101,22 @@
     for (var t = 0; t < pRights.length; t++) {
       var w = generateTrial(r, g, pRights[t], opt.zeta);
       var o = observe(w.m, pb, opt.beta, opt.zeta);
-      var ch = choose(o.post, r);
+      var ch = applyLapse(choose(o.post, r), r, opt.lapse);
       out.trials.push({ stim: w.stim, c: w.c, m: w.m, pi: o.pi, post: o.post, choice: ch, correct: ch === w.stim, pbBefore: pb });
-      pb = updateBlock(w.stim, pb, opt.beta);
-      out.PB.push(pb);
+      pb = predictBlock(updateBlock(w.stim, pb, opt.beta), opt.hazard);
+      out.PB.push(pb);                     // the belief carried into the next trial
     }
     return out;
   }
-  /* trials (counted from `start`, 1-based) until belief in `block` first reaches 0.9; null if never */
-  function trialsTo90(PB, block, start) {
+  /* trials_to_learn: trials (counted from `start`, 1-based) until the prior pi has stayed within MARGIN of
+     where it settles for `block` for HOLD trials in a row. Returns the trial that run started; null if never. */
+  function trialsToLearn(PB, block, start, beta) {
     start = start || 1;
-    for (var k = start; k < PB.length; k++) if (PB[k][block] >= 0.9) return k - start + 1;
+    var run = 0;
+    for (var k = start; k < PB.length; k++) {
+      run = Math.abs(computePrior(PB[k], beta) - SETTLED[block]) <= MARGIN ? run + 1 : 0;
+      if (run === HOLD) return k - start + 1 - HOLD + 1;
+    }
     return null;
   }
   function seq(pre, p0, post, p1) {
@@ -109,17 +127,17 @@
   }
   function median(xs) { var s = xs.slice().sort(function (a, b) { return a - b; }); return s.length ? s[Math.floor(s.length / 2)] : null; }
 
-  /* the poster's three numbers: flat start into 80/20, flat start into 50/50, and an 80/20 -> 20/80 reversal
-     after 19 trials. Same definitions as poster_figs.py. */
+  /* three numbers: flat start into 80/20, flat start into 50/50, and an 80/20 -> 20/80 reversal after a
+     50-trial block (the task's average block length). */
   var CONDITIONS = [
     { key: "biased", label: "to learn a biased block", seqs: function () { return seq(0, 0, 120, 0.8); }, block: 0, start: 1 },
     { key: "unbiased", label: "to learn an unbiased block", seqs: function () { return seq(0, 0, 120, 0.5); }, block: 1, start: 1 },
-    { key: "reversal", label: "to relearn after a reversal", seqs: function () { return seq(19, 0.8, 100, 0.2); }, block: 2, start: 20 }
+    { key: "reversal", label: "to relearn after a reversal", seqs: function () { return seq(50, 0.8, 100, 0.2); }, block: 2, start: 51 }
   ];
   function runCondition(cond, runs, seed0) {
     var vals = [], never = 0, s = cond.seqs();
     for (var i = 0; i < runs; i++) {
-      var v = trialsTo90(simulate(s, (seed0 + i * 7919) >>> 0).PB, cond.block, cond.start);
+      var v = trialsToLearn(simulate(s, (seed0 + i * 7919) >>> 0).PB, cond.block, cond.start);
       if (v === null) never++; else vals.push(v);
     }
     return { values: vals, never: never, median: median(vals), runs: runs };
@@ -132,10 +150,10 @@
   }
 
   root.WLModel = {
-    C_LEVELS: C_LEVELS, C_PROBS: C_PROBS, SIGMA: SIGMA, BETA: BETA, ZETA: ZETA,
+    C_LEVELS: C_LEVELS, C_PROBS: C_PROBS, SIGMA: SIGMA, BETA: BETA, ZETA: ZETA, HAZARD: HAZARD, LAPSE: LAPSE, SETTLED: SETTLED,
     rng: rng, gaussFrom: gaussFrom, Phi: Phi, blockOf: blockOf, pickContrast: pickContrast,
-    generateTrial: generateTrial, computePrior: computePrior, observe: observe, observeDirection: observe, updateBlock: updateBlock, choose: choose,
-    simulate: simulate, trialsTo90: trialsTo90, seq: seq, median: median,
+    generateTrial: generateTrial, computePrior: computePrior, observe: observe, observeDirection: observe, updateBlock: updateBlock, predictBlock: predictBlock, choose: choose, applyLapse: applyLapse,
+    simulate: simulate, trialsToLearn: trialsToLearn, seq: seq, median: median,
     CONDITIONS: CONDITIONS, runCondition: runCondition, pLickRight: pLickRight
   };
 })(typeof window !== "undefined" ? window : globalThis);

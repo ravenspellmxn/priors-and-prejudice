@@ -207,7 +207,7 @@
 <section id="s2" class="station stack" hidden>
   <div class="bar"><button class="glassbtn" data-go="home" aria-label="Back to the shelf">←</button><span class="plate"><span class="n">02</span>The question</span></div>
   <div><h2 class="title">How fast does it learn a block?</h2>
-  <p class="lede">It starts with no idea which block it's in. The block is 80/20. Drag the clamp: how many trials until it's 90% sure?</p></div>
+  <p class="lede">It starts with no idea which block it's in. The block is 80/20. Drag the clamp: how many trials until it has learned the block, so its lean stops changing?</p></div>
   <div class="instrument">
     <div class="s2grid">
       <div class="burette" id="bur2">
@@ -224,7 +224,7 @@
     </div>
     <div class="row"><button class="key" id="run2">Run the trials</button><span class="cap" id="res2"></span></div>
   </div>
-  <p class="insight" id="ins2" hidden><b>What you just saw <span class="draft">draft</span></b>About 8 trials. A biased block is learned fast. The poster asks how that changes when the block switches.</p>
+  <p class="insight" id="ins2" hidden><b>What you just saw <span class="draft">draft</span></b>About 10 trials. A biased block is learned fast. The poster asks how that changes when the block switches.</p>
   <div class="next"><button class="chrome" data-go="s1">← 01</button><button class="chrome" data-go="s3">Next: the model →</button></div>
 </section>
 
@@ -274,27 +274,27 @@
 <section id="s5" class="station stack" hidden>
   <div class="bar"><button class="glassbtn" data-go="home" aria-label="Back to the shelf">←</button><span class="plate"><span class="n">05</span>Results</span></div>
   <div><h2 class="title">Run 2,000 mice</h2>
-  <p class="lede">Pull the lever to run 2,000 simulated mice through three situations. Each burette reads the median trials until 90% sure.</p></div>
+  <p class="lede">Pull the lever to run 2,000 simulated mice through three situations. Each burette reads the median trials until its lean settles on the new block.</p></div>
   <div class="instrument">
     <div class="s5grid">
       <button class="lever" id="lever" aria-label="Pull the lever to run 2,000 simulated mice"><span class="slot"></span><span class="handle"></span><span class="lab">PULL</span></button>
       <div class="burets" id="burets"></div>
     </div>
     <div class="sheet replay stack" id="replay" hidden style="gap:12px">
-      <span class="plate" style="align-self:flex-start">Why so slow?</span>
-      <p class="cap" style="margin:0">One mouse: 19 trials of 80/20, then the block flips to 20/80.</p>
+      <span class="plate" style="align-self:flex-start">One reversal</span>
+      <p class="cap" style="margin:0">One mouse: 50 trials of 80/20, then the block flips to 20/80.</p>
       <div class="beliefs" id="bel5"></div>
       <div class="counter" id="cnt5"></div>
     </div>
   </div>
-  <p class="insight" id="ins5" hidden><b>What you just saw <span class="draft">draft</span></b>After a long biased block it's so sure that the opposite block seems almost impossible. It passes through "unbiased" first, so relearning takes far longer.</p>
+  <p class="insight" id="ins5" hidden><b>What you just saw <span class="draft">draft</span></b>Because it expects blocks to switch (about once every 50 trials), it never gets so sure that the opposite block seems impossible, so a reversal is relearned about as fast as a biased block. The unbiased block is the slow one.</p>
   <div class="next"><button class="chrome" data-go="s4">← 04</button><button class="chrome" data-go="s6">Next: be the mouse →</button></div>
 </section>
 
 <!-- ===================== 06 ===================== -->
 <section id="s6" class="station stack" hidden>
   <div class="bar"><button class="glassbtn" data-go="home" aria-label="Back to the shelf">←</button><span class="plate"><span class="n">06</span>Takeaway</span></div>
-  <div class="sheet paper"><p class="prompt"><span class="draft" style="margin:0 0 4px;display:block">draft · Raven's takeaway goes here</span>A Bayesian observer learns a biased block in about 8 trials but needs far longer after a reversal, so block lengths should leave room for relearning.</p></div>
+  <div class="sheet paper"><p class="prompt"><span class="draft" style="margin:0 0 4px;display:block">draft · Raven's takeaway goes here</span>A Bayesian observer that expects switches learns a biased block in about 10 trials and relearns a reversal in about 13, but needs about 28 to settle on an unbiased block, so unbiased blocks need the most room.</p></div>
   <div><h2 class="title">Be the mouse</h2>
   <p class="lede">20 trials in a hidden block. Watch the grating, then lick left or right. The observer plays the same trials.</p></div>
   <div class="instrument">
