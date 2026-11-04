@@ -152,12 +152,12 @@
   #home>header,#home>.howto,#home>.sheet,#home>.cap{max-width:600px}
   .shelves{display:grid;grid-template-columns:1fr 1fr;gap:30px;align-items:end}
   .shelves>.shelfwrap+.shelfwrap{margin-top:0}
-  .station:not(#home):not([hidden]){display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);column-gap:34px;row-gap:18px;align-items:start}
+  .station:not(#home):not([hidden]){display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);column-gap:34px;row-gap:18px;align-items:start}
   .station:not(#home)>.bar{grid-column:1/-1;margin-bottom:0}
   .station:not(#home)>.next{grid-column:1/-1;margin-top:4px}
   .station:not(#home)>.paper{grid-column:1/-1}
-  .station:not(#home)>.instrument{grid-column:1;align-self:start}
-  .station:not(#home)>.head,.station:not(#home)>.insight{grid-column:2;align-self:start}
+  .station:not(#home)>.head,.station:not(#home)>.insight{grid-column:1;align-self:start}
+  .station:not(#home)>.instrument{grid-column:2;align-self:start}
   .station:not(#home) .title{margin-top:0}
 }
 @media (min-width:1200px){.wrap{max-width:1000px}}
