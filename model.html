@@ -13,7 +13,7 @@
   --paper:#fbf8f1;--paper-ink:#0e2233;--code-bg:#f3f7f9;--code-hl:rgba(53,163,160,.16);
   --tint:#35a3a0;--tint-ink:#23807d;
   --right:#35a3a0;--left:#0e2233;--world:#5a6b78;--mouse:#1f7a77;
-  --ok:#1f7a77;--miss:#b9313d;--dim:rgba(14,34,51,.13);
+  --ok:#1f7a77;--miss:hsl(from var(--tint) calc(h + 150) 58% 46%);--dim:rgba(14,34,51,.13);
   --chrome:linear-gradient(180deg,#ffffff 0%,#eef1f4 12%,#c6cdd4 30%,#8f98a1 46%,#d9dee3 54%,#f6f8f9 63%,#adb5bd 82%,#e2e6ea 100%);
   --chrome-ink:#0e2233;--contact:rgba(12,28,40,.22);
   --f-body:'Geist',system-ui,-apple-system,'Segoe UI',sans-serif;
@@ -364,9 +364,9 @@ footer ol li::before{content:counter(ln);position:absolute;left:14px;width:2.6em
         <div class="chart" id="c-dir"></div>
         <div class="legend" id="lg-dir">
           <span><i class="line" style="border-color:var(--muted);opacity:.7"></i>Gray = prior &pi;, P(right) before looking, straight from the block belief</span>
-          <span><i class="line" style="border-color:var(--right)"></i>Blue = posterior, P(right) after seeing m</span>
+          <span><i class="line" style="border-color:var(--right)"></i>Teal = posterior, P(right) after seeing m</span>
         </div>
-        <p class="caption" id="cap-dir"><b>How to read it.</b> Both lines answer "how likely is it that this trial's grating moved right." Gray is the expectation before looking, which is just the block belief from the graph above turned into a lean. Blue is after seeing m. Above 50% the mouse chooses right, below 50% it chooses left. Blue hugging gray means the mouse is trusting the block; blue jumping away from gray means the observation won.</p>
+        <p class="caption" id="cap-dir"><b>How to read it.</b> Both lines answer "how likely is it that this trial's grating moved right." Gray is the expectation before looking, which is just the block belief from the graph above turned into a lean. Teal is after seeing m. Above 50% the mouse chooses right, below 50% it chooses left. Teal hugging gray means the mouse is trusting the block; teal jumping away from gray means the observation won.</p>
         <div class="legend" id="lg-acc" hidden>
           <span><i class="line" style="border-color:var(--acc)"></i>Mean accuracy at each trial, 500 runs</span>
         </div>
@@ -377,7 +377,7 @@ footer ol li::before{content:counter(ln);position:absolute;left:14px;width:2.6em
           <span><i style="background:var(--warn)"></i>Wrong choice</span>
           <span style="color:var(--faint)">top row = chose right, bottom row = chose left</span>
         </div>
-        <p class="caption"><b>Choices.</b> One dot per trial. Top row it chose right, bottom row it chose left. Green means that choice matched the true direction, red means it did not.</p>
+        <p class="caption"><b>Choices.</b> One dot per trial. Top row it chose right, bottom row it chose left. Teal means that choice matched the true direction, rose means it did not.</p>
       </div>
 
       <div class="panel">
