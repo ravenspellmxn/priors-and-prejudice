@@ -6,7 +6,8 @@
   --en1:#fdfefd; --en2:#eceff0; --steel1:#d5dbe0; --steel2:#aeb6bd; --graphite:#3b4650;
   --paper1:#fbf8f1; --paper2:#f1ece1;
   --tint:#35a3a0; --tint-ink:#1f7a77; --tint-soft:rgba(53,163,160,.16);
-  --late:#b9313d;
+  --late:#b9313d; /* LATE / overdue only */
+  --pen-warm:hsl(from var(--tint) calc(h + 150) 58% 46%); /* warm accent derived from the liquid */
   --display:'Geist',system-ui,-apple-system,'Segoe UI',sans-serif;
   --mono:'Geist Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
   --slosh:cubic-bezier(.3,1.25,.5,1);
