@@ -205,11 +205,11 @@
         V[4].classList.add("on"); var R = trial.choice === 1;
         setLv($("l4"), R ? 1 : 0.02); $("vv4").textContent = R ? "R" : "L";
         $(R ? "spR" : "spL").classList.add("lit");
-        $("st3").innerHTML = "<b>Lick.</b> It licks the side with the higher posterior: <span class=\"mono\">" + (R ? "right" : "left") + "</span>.";
+        $("st3").innerHTML = "<b>Choice.</b> It chooses the side with the higher posterior: <span class=\"mono\">" + (R ? "right" : "left") + "</span>.";
       } else if (step === 5) {
         var ok = trial.correct, R2 = trial.stim === 1;
         mini(pbAfter); $("vv0").textContent = pct(pbAfter[0]) + " R"; V[0].classList.add("on");
-        $("st3").innerHTML = "<b>Feedback.</b> The grating really moved <span class=\"mono\">" + (R2 ? "right" : "left") + "</span>, so the lick was " + (ok ? "rewarded" : "not rewarded") + ". Knowing the true side, it updates its block belief to <span class=\"mono\">" + pct(pbAfter[0]) + "</span> mostly-right. That becomes the next trial's prior.";
+        $("st3").innerHTML = "<b>Feedback.</b> The grating really moved <span class=\"mono\">" + (R2 ? "right" : "left") + "</span>, so the choice was " + (ok ? "rewarded" : "not rewarded") + ". Knowing the true side, it updates its block belief to <span class=\"mono\">" + pct(pbAfter[0]) + "</span> mostly-right. That becomes the next trial's prior.";
         $("step3").disabled = true; done++;
         if (done >= 1) $("ins3").hidden = false;
       }

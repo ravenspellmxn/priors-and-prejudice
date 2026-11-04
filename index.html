@@ -186,7 +186,7 @@
 <section id="s1" class="station stack" hidden>
   <div class="bar"><button class="glassbtn" data-go="home" aria-label="Back to the shelf">←</button><span class="plate"><span class="n">01</span>Why priors</span></div>
   <div><h2 class="title">Faint evidence, strong prior</h2>
-  <p class="lede">The mouse is in a mostly-right block (80/20) and knows it. This grating drifts <b>left</b>. Turn the dial down and watch where it licks.</p></div>
+  <p class="lede">The observer is in a mostly-right block (80/20) and knows it. This grating drifts <b>left</b>. Turn the dial down and watch which way it chooses.</p></div>
   <div class="instrument">
     <div class="s1grid">
       <div class="stack" style="gap:14px">
@@ -197,14 +197,14 @@
         </div>
       </div>
       <div class="stack" style="gap:6px;align-items:center">
-        <div class="tubehead">licks right</div>
+        <div class="tubehead">chooses right</div>
         <div class="glass tall" style="width:56px;flex:1"><i class="liq" id="t1" style="--lv:0%"></i><i class="ticks"></i><div class="marker" id="m1"></div></div>
         <div class="big" id="t1v" style="font-size:22px">0%</div>
         <div class="cap" id="m1v" style="text-align:center">- - no prior</div>
       </div>
     </div>
   </div>
-  <p class="insight" id="ins1" hidden><b>What you just saw</b>When the evidence is faint, the observer licks with the block, not the grating. That's the prior at work.</p>
+  <p class="insight" id="ins1" hidden><b>What you just saw</b>When the evidence is faint, the observer chooses with the block, not the grating. That's the prior at work.</p>
   <div class="next"><span></span><button class="chrome" data-go="s2">Next: the question →</button></div>
 </section>
 
@@ -244,7 +244,7 @@
       <div class="vessel" id="v1"><div class="glass"><i class="liq" id="l1" style="--lv:0%"></i></div><span class="nm">prior<br>P(right)</span><span class="val" id="vv1">·</span></div>
       <div class="vessel" id="v2"><div class="glass"><i class="liq" id="l2" style="--lv:0%;--c:#7f93a6"></i></div><span class="nm">evidence<br>m</span><span class="val" id="vv2">·</span></div>
       <div class="vessel" id="v3"><div class="glass"><i class="liq" id="l3" style="--lv:0%"></i></div><span class="nm">posterior<br>P(right)</span><span class="val" id="vv3">·</span></div>
-      <div class="vessel" id="v4"><div class="glass"><i class="liq" id="l4" style="--lv:0%;--c:#0e2233"></i></div><span class="nm">lick</span><span class="val" id="vv4">·</span></div>
+      <div class="vessel" id="v4"><div class="glass"><i class="liq" id="l4" style="--lv:0%;--c:#0e2233"></i></div><span class="nm">choice</span><span class="val" id="vv4">·</span></div>
     </div>
     <div class="evscale" id="evs"><span class="mid"></span><span class="lab" style="left:10px">looks left</span><span class="lab" style="right:10px">looks right</span><span class="evdrop" id="evd"></span></div>
     <div class="spouts"><span class="spout" id="spL">L</span><span class="spout" id="spR">R</span></div>
@@ -279,12 +279,12 @@
 <section id="s5" class="station stack" hidden>
   <div class="bar"><button class="glassbtn" data-go="home" aria-label="Back to the shelf">←</button><span class="plate"><span class="n">05</span>Results</span></div>
   <div><h2 class="title">A bias forms, then fades</h2>
-  <p class="lede">Pull the lever to run 2,000 mice twice: entering an 80/20 block, then after that block turns 50/50. The curve is the share that lick the biased side.</p></div>
+  <p class="lede">Pull the lever to run 2,000 mice twice: entering an 80/20 block, then after that block turns 50/50. The curve is the share that choose the biased side.</p></div>
   <div class="instrument">
     <div class="s5grid">
       <button class="lever" id="lever" aria-label="Pull the lever to run 2,000 simulated mice"><span class="slot"></span><span class="handle"></span><span class="lab">PULL</span></button>
       <div class="stack" style="gap:14px">
-        <canvas id="curve5" width="520" height="300" aria-label="Share of mice licking the biased side, forming then fading"></canvas>
+        <canvas id="curve5" width="520" height="300" aria-label="Share of mice choosing the biased side, forming then fading"></canvas>
         <div class="formfade">
           <div><div class="big" id="formN">·</div><span class="cap">trials to settle into a bias</span></div>
           <div><div class="big" id="fadeN">·</div><span class="cap">trials for the bias to fade once neutral</span></div>
