@@ -210,7 +210,7 @@ footer ol li::before{content:counter(ln);position:absolute;left:14px;width:2.6em
   <header class="top">
     <p class="eyebrow"><a href="index.html" style="color:inherit">&larr; Priors and Prejudice</a> &middot; <span class="enamel"><span>Bayesian observer</span></span></p>
     <h1>Block Belief Machine</h1>
-    <p class="lede">A simulated mouse watches a drifting grating each trial and licks left or right. It has to learn two things at once: which way this grating moves, and which kind of block it is living in. Move the world's knobs and the observer's knobs separately and watch both beliefs move.</p>
+    <p class="lede">A simulated mouse watches a drifting grating each trial and chooses left or right. It has to learn two things at once: which way this grating moves, and which kind of block it is living in. Move the world's knobs and the observer's knobs separately and watch both beliefs move.</p>
   </header>
 
   <section class="tiles" aria-label="Summary of the current run">
@@ -302,9 +302,9 @@ footer ol li::before{content:counter(ln);position:absolute;left:14px;width:2.6em
           <div class="note">Before each trial the observer keeps 1 &minus; h of each block belief and spreads h over the other two blocks (<span class="mono">predict_block</span>). With h = 0 it can get stuck after a reversal. The task's blocks average about 50 trials, so h = 1/50.</div>
         </div>
         <div class="ctrl">
-          <div class="row"><label for="s-l">Lapse &middot; chance of a random lick</label><span class="rdval mono" id="v-l">0.02</span></div>
+          <div class="row"><label for="s-l">Lapse &middot; chance of a random choice</label><span class="rdval mono" id="v-l">0.02</span></div>
           <input type="range" id="s-l" min="0" max="0.1" value="0.02" step="0.01">
-          <div class="note">With this chance the lick is a coin flip, whatever the mouse believes (<span class="mono">apply_lapse</span>). Real mice do this; it keeps accuracy below 100%.</div>
+          <div class="note">With this chance the choice is a coin flip, whatever the mouse believes (<span class="mono">apply_lapse</span>). Real mice do this; it keeps accuracy below 100%.</div>
         </div>
         <div class="ctrl">
           <div class="note">The observer shares the world's &zeta; and uses &sigma; = <span class="mono" id="v-sigma">0.49</span>, the spread of the nine signed contrast levels, as its contrast prior. Both fixed.</div>
@@ -327,7 +327,7 @@ footer ol li::before{content:counter(ln);position:absolute;left:14px;width:2.6em
       <div class="howto" aria-label="Reading order">
         <div><b>1 &middot; The world makes a trial</b>It picks a direction and a contrast, then adds noise. First graph.</div>
         <div><b>2 &middot; Which block am I in?</b>After each trial the mouse updates its belief about the block. Second graph.</div>
-        <div><b>3 &middot; Which way, this trial?</b>Before looking it expects one side. After looking it decides, then licks. Third graph.</div>
+        <div><b>3 &middot; Which way, this trial?</b>Before looking it expects one side. After looking it decides, then chooses. Third graph.</div>
         <div><b>4 &middot; One trial as a grid</b>The same numbers for a single trial, with the two sums.</div>
       </div>
       <div class="teach" id="teach"></div>
@@ -362,18 +362,18 @@ footer ol li::before{content:counter(ln);position:absolute;left:14px;width:2.6em
           <span><i class="line" style="border-color:var(--muted);opacity:.7"></i>Gray = prior &pi;, P(right) before looking, straight from the block belief</span>
           <span><i class="line" style="border-color:var(--right)"></i>Blue = posterior, P(right) after seeing m</span>
         </div>
-        <p class="caption" id="cap-dir"><b>How to read it.</b> Both lines answer "how likely is it that this trial's grating moved right." Gray is the expectation before looking, which is just the block belief from the graph above turned into a lean. Blue is after seeing m. Above 50% the mouse licks right, below 50% it licks left. Blue hugging gray means the mouse is trusting the block; blue jumping away from gray means the observation won.</p>
+        <p class="caption" id="cap-dir"><b>How to read it.</b> Both lines answer "how likely is it that this trial's grating moved right." Gray is the expectation before looking, which is just the block belief from the graph above turned into a lean. Blue is after seeing m. Above 50% the mouse chooses right, below 50% it chooses left. Blue hugging gray means the mouse is trusting the block; blue jumping away from gray means the observation won.</p>
         <div class="legend" id="lg-acc" hidden>
           <span><i class="line" style="border-color:var(--acc)"></i>Mean accuracy at each trial, 500 runs</span>
         </div>
-        <p class="caption" id="cap-acc" hidden><b>How to read it.</b> Averaged over 500 runs: the share of runs where the lick on that trial was correct. Chance is 50%. It climbs as the block belief sharpens and the prior starts helping on faint trials.</p>
+        <p class="caption" id="cap-acc" hidden><b>How to read it.</b> Averaged over 500 runs: the share of runs where the choice on that trial was correct. Chance is 50%. It climbs as the block belief sharpens and the prior starts helping on faint trials.</p>
         <div class="chart" id="c-choice" style="margin-top:10px"></div>
         <div class="legend" id="lg-choice">
-          <span><i style="background:var(--ok)"></i>Correct lick</span>
-          <span><i style="background:var(--warn)"></i>Wrong lick</span>
-          <span style="color:var(--faint)">top row = licked right, bottom row = licked left</span>
+          <span><i style="background:var(--ok)"></i>Correct choice</span>
+          <span><i style="background:var(--warn)"></i>Wrong choice</span>
+          <span style="color:var(--faint)">top row = chose right, bottom row = chose left</span>
         </div>
-        <p class="caption"><b>Licks.</b> One dot per trial. Top row it licked right, bottom row it licked left. Green means that lick matched the true direction, red means it did not.</p>
+        <p class="caption"><b>Choices.</b> One dot per trial. Top row it chose right, bottom row it chose left. Green means that choice matched the true direction, red means it did not.</p>
       </div>
 
       <div class="panel">
@@ -391,7 +391,7 @@ footer ol li::before{content:counter(ln);position:absolute;left:14px;width:2.6em
         <summary>Show the numbers (table)</summary>
         <div class="tablewrap">
           <table id="datatable">
-            <thead><tr><th>Trial</th><th>Stimulus</th><th class="mono">Contrast</th><th class="mono">m</th><th class="mono">&pi; P(right)</th><th class="mono">P(right | m)</th><th>Lick</th><th class="mono">P(R-biased)</th><th class="mono">P(unbiased)</th><th class="mono">P(L-biased)</th></tr></thead>
+            <thead><tr><th>Trial</th><th>Stimulus</th><th class="mono">Contrast</th><th class="mono">m</th><th class="mono">&pi; P(right)</th><th class="mono">P(right | m)</th><th>Choice</th><th class="mono">P(R-biased)</th><th class="mono">P(unbiased)</th><th class="mono">P(L-biased)</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
@@ -406,7 +406,7 @@ footer ol li::before{content:counter(ln);position:absolute;left:14px;width:2.6em
       <li>Prior for right: &pi; = &beta;&middot;P(R-biased) + 0.5&middot;P(unbiased) + (1 &minus; &beta;)&middot;P(L-biased).</li>
       <li>Observation m drawn from Normal(stimulus &times; contrast, &zeta;&sup2;). Contrast is either the fixed level or drawn from the task mix (0, 0.0625, 0.125, 0.25, 1 with probabilities 0.1, 0.3, 0.3, 0.2, 0.1).</li>
       <li>Likelihood of right = &Phi;(&mu;* / &sigma;*) with &mu;* = &zeta;<sup>&minus;2</sup>m / (&sigma;<sup>&minus;2</sup> + &zeta;<sup>&minus;2</sup>) and &sigma;* = (&sigma;<sup>&minus;2</sup> + &zeta;<sup>&minus;2</sup>)<sup>&minus;1/2</sup>; posterior by Bayes' rule with &pi;.</li>
-      <li>Lick the side with the larger posterior (LLR sign). Then, after feedback, update the block belief with the true stimulus using &beta;, 0.5, 1 &minus; &beta;. A small share of licks (the lapse rate) are random.</li>
+      <li>Choose the side with the larger posterior (LLR sign). Then, after feedback, update the block belief with the true stimulus using &beta;, 0.5, 1 &minus; &beta;. A small share of choices (the lapse rate) are random.</li>
       <li>Before the next trial, allow for a switch: keep 1 &minus; h of each block belief and spread h over the other two. Learned = the prior &pi; stays within 0.05 of where it settles for that block for 5 trials in a row.</li>
     </ol>
   </footer>
@@ -513,7 +513,7 @@ footer ol li::before{content:counter(ln);position:absolute;left:14px;width:2.6em
       var pr = clamp(o.postR, 1e-12, 1 - 1e-12);
       var llr = Math.log(pr / (1 - pr));
       var ch = llr > 1e-9 ? 1 : (llr < -1e-9 ? -1 : (rng() < 0.5 ? 1 : -1));
-      if (lrng() < st.lapse) ch = lrng() < 0.5 ? 1 : -1;   // apply_lapse: a random lick, whatever it believes
+      if (lrng() < st.lapse) ch = lrng() < 0.5 ? 1 : -1;   // apply_lapse: a random choice, whatever it believes
       out.stim.push(w.stim); out.c.push(w.c); out.m.push(w.m);
       out.pi.push(o.pi); out.postR.push(o.postR); out.choice.push(ch); out.correct.push(ch === w.stim ? 1 : 0);
       pb = updateBlock(w.stim, pb);
@@ -718,7 +718,7 @@ footer ol li::before{content:counter(ln);position:absolute;left:14px;width:2.6em
   function drawChoices(sim) {
     var H = 62, host = document.getElementById("c-choice");
     host.innerHTML = "";
-    var svg = el("svg", { viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": "Lick on each trial, marked correct or wrong" });
+    var svg = el("svg", { viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": "Choice on each trial, marked correct or wrong" });
     var yR = 16, yL = 40;
     [yR, yL].forEach(function (yy, k) {
       svg.appendChild(el("line", { x1: ML, y1: yy, x2: W - MR, y2: yy, stroke: "var(--grid)", "stroke-width": 1 }));
@@ -796,7 +796,7 @@ footer ol li::before{content:counter(ln);position:absolute;left:14px;width:2.6em
     row(frag, "Observation m", (sim.m[t] >= 0 ? "+" : "") + sim.m[t].toFixed(3), "var(--muted)");
     row(frag, "Prior \u03c0 P(right)", pct(sim.pi[t]), "var(--muted)");
     row(frag, "Posterior P(right | m)", pct(sim.postR[t]), "var(--right)");
-    row(frag, "Lick", (sim.choice[t] === 1 ? "right" : "left") + (sim.correct[t] ? " \u2713" : " \u2715"), sim.correct[t] ? "var(--ok)" : "var(--warn)");
+    row(frag, "Choice", (sim.choice[t] === 1 ? "right" : "left") + (sim.correct[t] ? " \u2713" : " \u2715"), sim.correct[t] ? "var(--ok)" : "var(--warn)");
     var hr = document.createElement("hr"); frag.appendChild(hr);
     var pb = sim.PB[i];
     row(frag, "R-biased after trial", pct(pb[0]), "var(--right)");
@@ -853,7 +853,7 @@ footer ol li::before{content:counter(ln);position:absolute;left:14px;width:2.6em
     var note = document.getElementById("boardnote");
     note.textContent = "Each cell is P(direction, block | m) for this trial, from the block belief carried in (" +
       pct(pb[0]) + " R-biased, " + pct(pb[1]) + " unbiased, " + pct(pb[2]) + " L-biased). " +
-      "Summing across a row gives the direction posterior the model licks on: P(right | m) = " + pct(rowSum[0]) + ". " +
+      "Summing across a row gives the direction posterior the model chooses from: P(right | m) =" + pct(rowSum[0]) + ". " +
       "Summing down a column is what the observation alone says about the block; the observer then updates the block belief with the true stimulus after feedback (" +
       (sim.stim[t] === 1 ? "right" : "left") + " here), landing at " + pct(sim.PB[i][0]) + " R-biased" +
       (st.hazard > 0 ? ", then moves " + (st.hazard * 100).toFixed(1) + "% of its belief toward the other blocks in case the block switches before the next trial." : ".");
@@ -866,7 +866,7 @@ footer ol li::before{content:counter(ln);position:absolute;left:14px;width:2.6em
     if (st.cMode === "fixed") {
       var snr = st.cFixed / st.zeta;
       snrTxt = "At contrast " + st.cFixed.toFixed(4) + " with noise \u03b6 = " + st.zeta.toFixed(2) + ", the observation lands on average " + snr.toFixed(2) + " noise widths from zero.";
-      verdict = snr < 0.25 ? "That is weak evidence, so the prior from the block belief does most of the deciding and licks follow the block bias." :
+      verdict = snr < 0.25 ? "That is weak evidence, so the prior from the block belief does most of the deciding and choices follow the block bias." :
         (snr < 0.8 ? "That is middling evidence: prior and observation share the decision, which is where block bias shows up as a tilt in the errors." :
           "That is strong evidence, so the observation overrides the prior and accuracy stays high whatever the block is.");
     } else {
@@ -916,7 +916,7 @@ footer ol li::before{content:counter(ln);position:absolute;left:14px;width:2.6em
       document.getElementById("t-acc-sub").textContent = "mean over 500 runs \u00b7 this sample " + pct(acc);
     } else {
       document.getElementById("t-acc").textContent = pct(acc);
-      document.getElementById("t-acc-sub").textContent = "correct licks in this sample";
+      document.getElementById("t-acc-sub").textContent = "correct choices in this sample";
     }
 
     var cr = sim.choice.filter(function (c) { return c === 1; }).length / st.n;
@@ -924,10 +924,10 @@ footer ol li::before{content:counter(ln);position:absolute;left:14px;width:2.6em
     if (avg) {
       var mcr = avg.meanCR.reduce(function (a, b) { return a + b; }, 0) / st.n;
       document.getElementById("t-bias").textContent = pct(mcr) + " right";
-      document.getElementById("t-bias-sub").textContent = "mean share of right licks \u00b7 world sends " + Math.round((st.switchOn ? (st.pRight * (st.switchAt - 1) + st.pRight2 * (st.n - st.switchAt + 1)) / st.n : st.pRight) * 100) + "% right";
+      document.getElementById("t-bias-sub").textContent = "mean share of right choices \u00b7 world sends " + Math.round((st.switchOn ? (st.pRight * (st.switchAt - 1) + st.pRight2 * (st.n - st.switchAt + 1)) / st.n : st.pRight) * 100) + "% right";
     } else {
       document.getElementById("t-bias").textContent = pct(cr) + " right";
-      document.getElementById("t-bias-sub").textContent = "licks \u00b7 stimulus was right " + pct(sr) + " of trials";
+      document.getElementById("t-bias-sub").textContent = "choices \u00b7 stimulus was right " + pct(sr) + " of trials";
     }
   }
 
@@ -979,13 +979,13 @@ footer ol li::before{content:counter(ln);position:absolute;left:14px;width:2.6em
     document.getElementById("lg-block-avg").hidden = !avg;
 
     if (avg) {
-      drawLines("c-dir", [{ vals: avg.meanAcc, x0: 1, color: "var(--acc)", label: "mean accuracy" }], { aria: "Mean accuracy at each trial over 500 runs", hline: 0.5, hlineLabel: "50% = chance", yTitle: "share of correct licks" });
+      drawLines("c-dir", [{ vals: avg.meanAcc, x0: 1, color: "var(--acc)", label: "mean accuracy" }], { aria: "Mean accuracy at each trial over 500 runs", hline: 0.5, hlineLabel: "50% = chance", yTitle: "share of correct choices" });
       document.getElementById("h-dir").innerHTML = "Behavior <span class=\"hint\">mean accuracy at each trial, 500 runs</span>";
     } else {
       drawLines("c-dir", [
         { vals: sim.pi, x0: 1, color: "var(--muted)", width: 1.5, opacity: 0.8, label: "before, \u03c0" },
         { vals: sim.postR, x0: 1, color: "var(--right)", label: "after m" }
-      ], { aria: "Prior and posterior probability that the stimulus is right, each trial", hline: 0.5, hlineLabel: "50% = no lean", yTitle: "P(this trial is right)", bands: ["licks right", "licks left"] });
+      ], { aria: "Prior and posterior probability that the stimulus is right, each trial", hline: 0.5, hlineLabel: "50% = no lean", yTitle: "P(this trial is right)", bands: ["chooses right", "chooses left"] });
       document.getElementById("h-dir").innerHTML = "What's the current direction <span class=\"hint\">P(right) before and after looking</span>";
     }
     document.getElementById("lg-dir").hidden = !!avg;
