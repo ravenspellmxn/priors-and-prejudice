@@ -143,6 +143,20 @@
 .flash{transition:box-shadow .2s}
 .flash.ok{box-shadow:inset 0 0 0 3px var(--steel1),inset 0 0 0 4.5px var(--steel2),0 0 0 4px var(--tint)}
 .flash.no{box-shadow:inset 0 0 0 3px var(--steel1),inset 0 0 0 4.5px var(--steel2),0 0 0 4px var(--late)}
+
+/* tablet + desktop: use the width. Stations go two-column (instrument left, title/explanation right); the shelf stays compact. Phone is untouched. */
+@media (min-width:880px){
+  .wrap{max-width:920px}
+  #home{max-width:600px;margin-inline:auto}
+  .station:not(#home):not([hidden]){display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);column-gap:34px;row-gap:18px;align-items:start}
+  .station:not(#home)>.bar{grid-column:1/-1;margin-bottom:0}
+  .station:not(#home)>.next{grid-column:1/-1;margin-top:4px}
+  .station:not(#home)>.paper{grid-column:1/-1}
+  .station:not(#home)>.instrument{grid-column:1;align-self:start}
+  .station:not(#home)>.head,.station:not(#home)>.insight{grid-column:2;align-self:start}
+  .station:not(#home) .title{margin-top:0}
+}
+@media (min-width:1200px){.wrap{max-width:1000px}}
 </style>
 
 <div class="drops" id="drops" aria-hidden="true"></div>
@@ -185,7 +199,7 @@
 <!-- ===================== 01 ===================== -->
 <section id="s1" class="station stack" hidden>
   <div class="bar"><button class="glassbtn" data-go="home" aria-label="Back to the shelf">←</button><span class="plate"><span class="n">01</span>Why priors</span></div>
-  <div><h2 class="title">Faint evidence, strong prior</h2>
+  <div class="head"><h2 class="title">Faint evidence, strong prior</h2>
   <p class="lede">The observer is in a mostly-right block (80/20) and knows it. This grating drifts <b>left</b>. Turn the dial down and watch which way it chooses.</p></div>
   <div class="instrument">
     <div class="s1grid">
@@ -211,7 +225,7 @@
 <!-- ===================== 02 ===================== -->
 <section id="s2" class="station stack" hidden>
   <div class="bar"><button class="glassbtn" data-go="home" aria-label="Back to the shelf">←</button><span class="plate"><span class="n">02</span>The question</span></div>
-  <div><h2 class="title">How fast does it learn a block?</h2>
+  <div class="head"><h2 class="title">How fast does it learn a block?</h2>
   <p class="lede">It starts with no idea which block it's in. The block is 80/20. Drag the clamp: how many trials until it has learned the block, so its lean stops changing?</p></div>
   <div class="instrument">
     <div class="s2grid">
@@ -236,7 +250,7 @@
 <!-- ===================== 03 ===================== -->
 <section id="s3" class="station stack" hidden>
   <div class="bar"><button class="glassbtn" data-go="home" aria-label="Back to the shelf">←</button><span class="plate"><span class="n">03</span>The model</span></div>
-  <div><h2 class="title">One trial, step by step</h2>
+  <div class="head"><h2 class="title">One trial, step by step</h2>
   <p class="lede">Tap Step to walk one trial through the observer.</p></div>
   <div class="instrument">
     <div class="vessels">
@@ -258,7 +272,7 @@
 <!-- ===================== 04 ===================== -->
 <section id="s4" class="station stack" hidden>
   <div class="bar"><button class="glassbtn" data-go="home" aria-label="Back to the shelf">←</button><span class="plate"><span class="n">04</span>Simulated task</span></div>
-  <div><h2 class="title">Which block is this?</h2>
+  <div class="head"><h2 class="title">Which block is this?</h2>
   <p class="lede">A block is hidden. Each drop is a trial: <b style="color:var(--tint-ink)">teal</b> means the grating moved right, <b>navy</b> means left. Tap the block when you think you know.</p></div>
   <div class="instrument">
     <div class="glass beaker" id="beaker" aria-label="Trials so far"></div>
@@ -278,7 +292,7 @@
 <!-- ===================== 05 ===================== -->
 <section id="s5" class="station stack" hidden>
   <div class="bar"><button class="glassbtn" data-go="home" aria-label="Back to the shelf">←</button><span class="plate"><span class="n">05</span>Results</span></div>
-  <div><h2 class="title">A bias forms, then fades</h2>
+  <div class="head"><h2 class="title">A bias forms, then fades</h2>
   <p class="lede">Pull the lever to run 2,000 mice twice: entering an 80/20 block, then after that block turns 50/50. The curve is the share that choose the biased side.</p></div>
   <div class="instrument">
     <div class="s5grid">
@@ -300,7 +314,7 @@
 <section id="s6" class="station stack" hidden>
   <div class="bar"><button class="glassbtn" data-go="home" aria-label="Back to the shelf">←</button><span class="plate"><span class="n">06</span>Takeaway</span></div>
   <div class="sheet paper"><p class="prompt">A Bayesian observer picks up a bias in about 6 trials but needs about 12 to let it go once the block turns neutral, so block length is set by the slower, fading side. Next: run the mice and record neural activity cell by cell, to test whether real biases form and shed this fast.</p></div>
-  <div><h2 class="title">Be the mouse</h2>
+  <div class="head"><h2 class="title">Be the mouse</h2>
   <p class="lede">20 trials in a hidden block. Watch the grating, then lick left or right. The observer plays the same trials.</p></div>
   <div class="instrument">
     <div class="window flash" id="win6"><canvas id="g6" width="320" height="240" aria-label="Grating for this trial"></canvas></div>

@@ -12,8 +12,8 @@
   --sheet:rgba(250,253,254,.86);--sheet-edge:rgba(255,255,255,.95);--sheet-line:rgba(110,170,195,.32);
   --paper:#fbf8f1;--paper-ink:#0e2233;--code-bg:#f3f7f9;--code-hl:rgba(53,163,160,.16);
   --tint:#35a3a0;--tint-ink:#23807d;
-  --right:#2a68b0;--left:#c2611f;--world:#5f7486;--mouse:#23807d;
-  --ok:#2c7a4b;--miss:#b9313d;--dim:rgba(14,34,51,.13);
+  --right:#35a3a0;--left:#0e2233;--world:#5a6b78;--mouse:#1f7a77;
+  --ok:#1f7a77;--miss:#b9313d;--dim:rgba(14,34,51,.13);
   --chrome:linear-gradient(180deg,#ffffff 0%,#eef1f4 12%,#c6cdd4 30%,#8f98a1 46%,#d9dee3 54%,#f6f8f9 63%,#adb5bd 82%,#e2e6ea 100%);
   --chrome-ink:#0e2233;--contact:rgba(12,28,40,.22);
   --f-body:'Geist',system-ui,-apple-system,'Segoe UI',sans-serif;
@@ -26,7 +26,7 @@
   --hair:var(--sheet-line);--hair-strong:rgba(110,145,165,.5);
   --accent:var(--tint-ink);--accent-soft:var(--code-hl);
   --warn:var(--miss);--grid:var(--dim);
-  --unb:var(--ink3);--acc:var(--mouse);
+  --unb:#7f93a6;--acc:var(--mouse);
   --right-soft:color-mix(in srgb,var(--right) 14%,transparent);
   --left-soft:color-mix(in srgb,var(--left) 14%,transparent);
   --unb-soft:color-mix(in srgb,var(--unb) 14%,transparent);
@@ -53,12 +53,16 @@ body{margin:0;min-height:100%;color:var(--ink);font-family:var(--f-body);font-si
 .enamel.m>span{border-color:var(--mouse);color:var(--mouse)}
 
 header.top{margin-bottom:20px}
-.eyebrow{margin:0 0 10px}
-h1{font-family:var(--f-body);font-weight:600;font-size:clamp(24px,4vw,32px);letter-spacing:-.02em;line-height:1.15;margin:0 0 8px;text-wrap:balance}
-.lede{color:var(--ink2);margin:0;max-width:66ch}
+.eyebrow{margin:0 0 10px;font:500 11.5px var(--f-mono);letter-spacing:.2em;text-transform:uppercase;color:var(--ink2)}
+.eyebrow a{color:inherit}
+h1{font-family:var(--f-body);font-weight:700;font-size:clamp(28px,6vw,40px);letter-spacing:-.035em;line-height:1.05;margin:0 0 10px;text-wrap:balance}
+.lede{color:var(--ink2);margin:0;max-width:66ch;font-size:16px}
 
 /* glass sheets */
 .tile,.panel,.howto div,.board .cell,.tooltip{background:var(--sheet);border:1px solid var(--sheet-edge);box-shadow:var(--shadow)}
+.panel,.tile{position:relative;background:linear-gradient(180deg,var(--en1),#f2f5f6)}
+.panel>*,.tile>*{position:relative;z-index:1}
+.panel::before,.tile::before{content:"";position:absolute;inset:7px;border:1.5px solid var(--ink);border-radius:8px;pointer-events:none;opacity:.8;z-index:0}
 .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:20px 0}
 .tile{border-radius:10px;padding:14px 15px;min-width:0}
 .tile .lbl{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);margin:0 0 8px}
