@@ -127,6 +127,11 @@
 .why{appearance:none;border:0;cursor:pointer;font:600 12px var(--mono);letter-spacing:.1em;text-transform:uppercase;padding:12px 14px;min-height:40px;border-radius:7px;background:var(--ink);color:var(--en1)}
 .why[hidden]{display:none}
 .replay[hidden]{display:none}
+#curve5{width:100%;height:auto;aspect-ratio:520/300;display:block;border-radius:12px;background:rgba(255,255,255,.55);box-shadow:inset 0 0 0 1.5px var(--steel2)}
+.formfade{display:flex;gap:18px}
+.formfade>div{flex:1;min-width:0}
+.formfade .big{font-size:40px}
+.formfade .cap{display:block;margin-top:3px}
 
 /* 06 game */
 .score{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -199,7 +204,7 @@
       </div>
     </div>
   </div>
-  <p class="insight" id="ins1" hidden><b>What you just saw <span class="draft">draft</span></b>When the evidence is faint, the observer licks with the block, not the grating. That's the prior at work.</p>
+  <p class="insight" id="ins1" hidden><b>What you just saw</b>When the evidence is faint, the observer licks with the block, not the grating. That's the prior at work.</p>
   <div class="next"><span></span><button class="chrome" data-go="s2">Next: the question →</button></div>
 </section>
 
@@ -224,7 +229,7 @@
     </div>
     <div class="row"><button class="key" id="run2">Run the trials</button><span class="cap" id="res2"></span></div>
   </div>
-  <p class="insight" id="ins2" hidden><b>What you just saw <span class="draft">draft</span></b>About 10 trials. A biased block is learned fast. The poster asks how that changes when the block switches.</p>
+  <p class="insight" id="ins2" hidden><b>What you just saw</b>About 6 to 10 trials, a biased block is learned fast. The poster asks the harder half: once the block turns neutral, how long until the old bias fades?</p>
   <div class="next"><button class="chrome" data-go="s1">← 01</button><button class="chrome" data-go="s3">Next: the model →</button></div>
 </section>
 
@@ -246,7 +251,7 @@
     <p class="steptext" id="st3"></p>
     <div class="row"><button class="key" id="step3">Step ▸</button><button class="chrome" id="new3">New trial</button></div>
   </div>
-  <p class="insight" id="ins3" hidden><b>What you just saw <span class="draft">draft</span></b>Every trial it mixes what it expects with what it sees, then updates what it expects.</p>
+  <p class="insight" id="ins3" hidden><b>What you just saw</b>Every trial it mixes what it expects with what it sees, then updates what it expects.</p>
   <div class="next"><button class="chrome" data-go="s2">← 02</button><button class="chrome" data-go="s4">Next: the task →</button></div>
 </section>
 
@@ -266,35 +271,35 @@
     <p class="steptext" id="res4" style="min-height:48px"></p>
     <div class="row"><button class="chrome" id="new4">New hidden block</button></div>
   </div>
-  <p class="insight" id="ins4" hidden><b>What you just saw <span class="draft">draft</span></b>The mouse never sees the label. It has to infer the block from trials, just like you did.</p>
+  <p class="insight" id="ins4" hidden><b>What you just saw</b>The mouse never sees the label. It has to infer the block from trials, just like you did.</p>
   <div class="next"><button class="chrome" data-go="s3">← 03</button><button class="chrome" data-go="s5">Next: results →</button></div>
 </section>
 
 <!-- ===================== 05 ===================== -->
 <section id="s5" class="station stack" hidden>
   <div class="bar"><button class="glassbtn" data-go="home" aria-label="Back to the shelf">←</button><span class="plate"><span class="n">05</span>Results</span></div>
-  <div><h2 class="title">Run 2,000 mice</h2>
-  <p class="lede">Pull the lever to run 2,000 simulated mice through three situations. Each burette reads the median trials until its lean settles on the new block.</p></div>
+  <div><h2 class="title">A bias forms, then fades</h2>
+  <p class="lede">Pull the lever to run 2,000 mice twice: entering an 80/20 block, then after that block turns 50/50. The curve is the share that lick the biased side.</p></div>
   <div class="instrument">
     <div class="s5grid">
       <button class="lever" id="lever" aria-label="Pull the lever to run 2,000 simulated mice"><span class="slot"></span><span class="handle"></span><span class="lab">PULL</span></button>
-      <div class="burets" id="burets"></div>
-    </div>
-    <div class="sheet replay stack" id="replay" hidden style="gap:12px">
-      <span class="plate" style="align-self:flex-start">One reversal</span>
-      <p class="cap" style="margin:0">One mouse: 50 trials of 80/20, then the block flips to 20/80.</p>
-      <div class="beliefs" id="bel5"></div>
-      <div class="counter" id="cnt5"></div>
+      <div class="stack" style="gap:14px">
+        <canvas id="curve5" width="520" height="300" aria-label="Share of mice licking the biased side, forming then fading"></canvas>
+        <div class="formfade">
+          <div><div class="big" id="formN">·</div><span class="cap">trials to settle into a bias</span></div>
+          <div><div class="big" id="fadeN">·</div><span class="cap">trials for the bias to fade once neutral</span></div>
+        </div>
+      </div>
     </div>
   </div>
-  <p class="insight" id="ins5" hidden><b>What you just saw <span class="draft">draft</span></b>Because it expects blocks to switch (about once every 50 trials), it never gets so sure that the opposite block seems impossible, so a reversal is relearned about as fast as a biased block. The unbiased block is the slow one.</p>
+  <p class="insight" id="ins5" hidden><b>What you just saw</b>The observer settles into a bias about twice as fast as it lets one go. Once the block turns neutral the old bias lingers about 12 trials, so shedding a bias, not forming it, sets how long a block needs to be.</p>
   <div class="next"><button class="chrome" data-go="s4">← 04</button><button class="chrome" data-go="s6">Next: be the mouse →</button></div>
 </section>
 
 <!-- ===================== 06 ===================== -->
 <section id="s6" class="station stack" hidden>
   <div class="bar"><button class="glassbtn" data-go="home" aria-label="Back to the shelf">←</button><span class="plate"><span class="n">06</span>Takeaway</span></div>
-  <div class="sheet paper"><p class="prompt"><span class="draft" style="margin:0 0 4px;display:block">draft · Raven's takeaway goes here</span>A Bayesian observer that expects switches learns a biased block in about 10 trials and relearns a reversal in about 13, but needs about 28 to settle on an unbiased block, so unbiased blocks need the most room.</p></div>
+  <div class="sheet paper"><p class="prompt">A Bayesian observer picks up a bias in about 6 trials but needs about 12 to let it go once the block turns neutral, so block length is set by the slower, fading side. Next: run the mice and record neural activity cell by cell, to test whether real biases form and shed this fast.</p></div>
   <div><h2 class="title">Be the mouse</h2>
   <p class="lede">20 trials in a hidden block. Watch the grating, then lick left or right. The observer plays the same trials.</p></div>
   <div class="instrument">

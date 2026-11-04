@@ -149,11 +149,34 @@
     return 1 - Phi((thr - cSigned) / zeta);
   }
 
+  /* choice accuracy (poster panel 05): P(lick the biased side) averaged over many mice.
+     form: from the start of an 80/20 block, the lick rises toward the biased (right) side.
+     fade: after an 80/20 block turns 50/50, the old bias decays back to chance. */
+  function biasedCurve(runs, seed0, N) {
+    N = N || 45; var sums = [], t; for (t = 0; t < N; t++) sums[t] = 0;
+    for (var i = 0; i < runs; i++) {
+      var sim = simulate(seq(0, 0, N, 0.8), (seed0 + i * 7919) >>> 0);
+      for (t = 0; t < N; t++) if (sim.trials[t].choice === 1) sums[t]++;
+    }
+    return sums.map(function (s) { return s / runs; });
+  }
+  function fadeCurve(runs, seed0, pre, N) {
+    pre = pre || 60; N = N || 45; var sums = [], t; for (t = 0; t < N; t++) sums[t] = 0;
+    for (var i = 0; i < runs; i++) {
+      var sim = simulate(seq(pre, 0.8, N, 0.5), (seed0 + i * 7919) >>> 0);
+      for (t = 0; t < N; t++) if (sim.trials[pre + t].choice === 1) sums[t]++;
+    }
+    return sums.map(function (s) { return s / runs; });
+  }
+  function crossUp(curve, thr) { for (var t = 0; t < curve.length; t++) if (curve[t] >= thr) return t + 1; return null; }
+  function crossDown(curve, thr) { for (var t = 0; t < curve.length; t++) if (curve[t] <= thr) return t + 1; return null; }
+
   root.WLModel = {
     C_LEVELS: C_LEVELS, C_PROBS: C_PROBS, SIGMA: SIGMA, BETA: BETA, ZETA: ZETA, HAZARD: HAZARD, LAPSE: LAPSE, SETTLED: SETTLED,
     rng: rng, gaussFrom: gaussFrom, Phi: Phi, blockOf: blockOf, pickContrast: pickContrast,
     generateTrial: generateTrial, computePrior: computePrior, observe: observe, observeDirection: observe, updateBlock: updateBlock, predictBlock: predictBlock, choose: choose, applyLapse: applyLapse,
     simulate: simulate, trialsToLearn: trialsToLearn, seq: seq, median: median,
-    CONDITIONS: CONDITIONS, runCondition: runCondition, pLickRight: pLickRight
+    CONDITIONS: CONDITIONS, runCondition: runCondition, pLickRight: pLickRight,
+    biasedCurve: biasedCurve, fadeCurve: fadeCurve, crossUp: crossUp, crossDown: crossDown
   };
 })(typeof window !== "undefined" ? window : globalThis);

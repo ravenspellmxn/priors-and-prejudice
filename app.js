@@ -259,50 +259,42 @@
   })();
 
   /* =====================================================================
-     05 · run 2,000 mice
+     05 · run 2,000 mice: a bias forms, then fades (poster panel 05)
      ===================================================================== */
   (function () {
-    var host = $("burets"), parts = [], ran = false, XMAX = 80;
-    M.CONDITIONS.forEach(function (c, i) {
-      var d = document.createElement("div"); d.className = "buret";
-      d.innerHTML = '<span class="val">·</span><div class="glass"><i class="liq" style="--lv:0%"></i><i class="ticks"></i></div><canvas class="hist" width="200" height="60" aria-hidden="true"></canvas><span class="nm">' + c.label + "</span>" + (c.key === "reversal" ? '<button class="why" hidden>watch one</button>' : "");
-      host.appendChild(d); parts.push({ val: d.querySelector(".val"), liq: d.querySelector(".liq"), cv: d.querySelector(".hist"), why: d.querySelector(".why") });
-    });
-    function hist(cv, vals) {
-      var ctx = cv.getContext("2d"), W = cv.width, H = cv.height, bins = new Array(20).fill(0);
-      vals.forEach(function (v) { bins[Math.min(19, Math.floor(Math.min(v, XMAX - 0.01) / (XMAX / 20)))]++; });
-      var mx = Math.max.apply(null, bins) || 1; ctx.clearRect(0, 0, W, H);
-      bins.forEach(function (b, i) { var h = b / mx * (H - 4); ctx.fillStyle = "#35a3a0"; ctx.fillRect(i * W / 20 + 1, H - h, W / 20 - 2, h); });
-      ctx.fillStyle = "#3a5264"; ctx.fillRect(0, H - 1, W, 1);
+    var SEED = 2027808452, cv = $("curve5"), N = 40, ran = false;
+    function Y(p, H) { return 14 + (1 - (p - 0.4) / 0.6) * (H - 44); }   // y maps 0.4..1.0
+    function X(t, W) { return 42 + t / N * (W - 54); }
+    function draw(form, fade) {
+      var ctx = cv.getContext("2d"), W = cv.width, H = cv.height;
+      ctx.clearRect(0, 0, W, H);
+      ctx.font = "13px 'Geist Mono', ui-monospace, monospace"; ctx.textBaseline = "middle";
+      [0.5, 0.6, 0.7, 0.8, 0.9, 1].forEach(function (p) {
+        ctx.strokeStyle = "#d4dee5"; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(42, Y(p, H)); ctx.lineTo(W - 12, Y(p, H)); ctx.stroke();
+        ctx.fillStyle = "#3a5264"; ctx.fillText(Math.round(p * 100), 8, Y(p, H));
+      });
+      ctx.setLineDash([5, 4]); ctx.strokeStyle = "#7f93a6"; ctx.beginPath(); ctx.moveTo(42, Y(0.5, H)); ctx.lineTo(W - 12, Y(0.5, H)); ctx.stroke(); ctx.setLineDash([]);
+      function line(curve, col, start) {
+        ctx.strokeStyle = col; ctx.lineWidth = 4; ctx.lineJoin = "round"; ctx.beginPath(); ctx.moveTo(X(0, W), Y(start, H));
+        for (var t = 0; t < N; t++) ctx.lineTo(X(t + 1, W), Y(curve[t], H));
+        ctx.stroke();
+      }
+      line(form, "#35a3a0", 0.5); line(fade, "#0e2233", 0.812);
+      var fN = M.crossUp(form, 0.75), dN = M.crossDown(fade, 0.55);
+      function dot(t, p, col, lab, dy) { ctx.fillStyle = col; ctx.beginPath(); ctx.arc(X(t, W), Y(p, H), 6, 0, 7); ctx.fill(); ctx.fillText(lab, X(t, W) + 10, Y(p, H) + dy); }
+      if (fN) dot(fN, form[fN - 1], "#1f7a77", "~" + fN + " to form", -15);
+      if (dN) dot(dN, fade[dN - 1], "#0e2233", "~" + dN + " to fade", 16);
+      ctx.fillStyle = "#3a5264"; ctx.textAlign = "center"; ctx.fillText("entering a biased block (teal) / block turns neutral (navy)", W / 2, H - 9); ctx.textAlign = "left";
+      return { fN: fN, dN: dN };
     }
     $("lever").addEventListener("click", async function () {
       var lv = this; if (lv.classList.contains("busy")) return;
-      lv.classList.add("down", "busy");
-      parts.forEach(function (p) { setLv(p.liq, 0); p.val.textContent = "·"; });
+      lv.classList.add("down", "busy"); $("formN").textContent = "·"; $("fadeN").textContent = "·";
       await wait(450);
-      for (var i = 0; i < M.CONDITIONS.length; i++) {
-        var r = M.runCondition(M.CONDITIONS[i], 2000, freshSeed()), p = parts[i];
-        setLv(p.liq, r.median / XMAX); p.val.textContent = r.median;
-        hist(p.cv, r.values);
-        if (p.why) { p.why.hidden = false; p.why.title = r.never + " of 2,000 hadn't settled within 100 trials"; }
-        await wait(380);
-      }
+      var form = M.biasedCurve(2000, SEED, N + 2), fade = M.fadeCurve(2000, SEED + 777, 60, N + 2);
+      var r = draw(form, fade);
+      $("formN").textContent = r.fN; $("fadeN").textContent = r.dN;
       lv.classList.remove("down", "busy"); ran = true; $("ins5").hidden = false;
-    });
-    var setBel = beliefTubes($("bel5")), replaying = false;
-    parts[2].why.addEventListener("click", async function () {
-      if (replaying) return; replaying = true;
-      $("replay").hidden = false; $("replay").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
-      var sim = M.simulate(M.seq(50, 0.8, 100, 0.2), freshSeed()), got = M.trialsToLearn(sim.PB, 2, 51);
-      var last = got ? 50 + got + 4 : 150;
-      for (var t = 0; t <= last; t++) {
-        var pb = sim.PB[t]; setBel(pb);
-        var phase = t <= 50 ? "80/20 block" : "after the flip to 20/80";
-        var learned = got && t >= 50 + got + 4;
-        $("cnt5").textContent = "trial " + t + " · " + phase + (learned ? " · learned the new block (settled from trial " + got + ")" : "");
-        await wait(t <= 50 ? 40 : 110);
-      }
-      replaying = false;
     });
   })();
 

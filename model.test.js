@@ -18,6 +18,10 @@ const hp = M.predictBlock([1,0,0]); check('hazard step', Math.abs(hp[0]-0.98)<1e
 // station 01 curve (zeta .25, pi .8): strong left -> almost never right, zero contrast -> mostly right
 const a = M.pLickRight(-1, 0.8, 0.25), b = M.pLickRight(0, 0.8, 0.25), c0 = M.pLickRight(0, 0.5, 0.25);
 check('01 strong left', a < 0.01, a.toFixed(4)); check('01 faint goes with prior', b > 0.8, b.toFixed(3)); check('01 no prior is 50/50', Math.abs(c0 - 0.5) < 1e-6, c0.toFixed(3));
+// 05 choice accuracy (poster panel 05): with the station seed a bias forms at 6, fades at 12
+const SEED5 = 2027808452, form5 = M.biasedCurve(2000, SEED5, 42), fade5 = M.fadeCurve(2000, SEED5 + 777, 60, 42);
+check('05 form = 6', M.crossUp(form5, 0.75) === 6, 'form ' + M.crossUp(form5, 0.75));
+check('05 fade = 12', M.crossDown(fade5, 0.55) === 12, 'fade ' + M.crossDown(fade5, 0.55));
 // timing for the 05 lever
 let t = Date.now(); M.CONDITIONS.forEach(c => M.runCondition(c, 500, 1)); console.log('1500 runs in', Date.now() - t, 'ms');
 process.exit(fail ? 1 : 0);
