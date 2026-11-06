@@ -81,6 +81,7 @@ h2.title{font-size:clamp(28px,8vw,36px)}
 .stack{display:flex;flex-direction:column;gap:16px}
 .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 .cap{font:400 12.5px/1.4 var(--mono);color:var(--ink2)}
+p.cap{font-family:var(--display);font-size:13px;line-height:1.5}   /* running colophon reads as prose, not a gauge label */
 .next{display:flex;justify-content:space-between;gap:12px;margin-top:6px}
 
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
