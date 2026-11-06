@@ -1,5 +1,8 @@
 /* Wet Lab materials for the poster companion. Day room, liquid: Teal. One look for every viewer, to match the
    printed poster. Layout: one phone column; each station is a single screen holding one instrument. */
+/* Self-hosted so the page makes no third-party request (Geist, SIL OFL 1.1, fonts/Geist-OFL.txt). */
+@font-face{font-family:'Geist';font-style:normal;font-weight:400 700;font-display:swap;src:url('fonts/Geist-Variable.woff2') format('woff2')}
+@font-face{font-family:'Geist Mono';font-style:normal;font-weight:400 600;font-display:swap;src:url('fonts/GeistMono-Variable.woff2') format('woff2')}
 :root,:root:not([data-theme="light"]),:root[data-theme="dark"]{
   --wall-a:#eef4f7; --wall-b:#dde8ef; --grout:rgba(110,145,165,.2);
   --ink:#0e2233; --ink2:#3a5264; --ink3:#5a6b78;

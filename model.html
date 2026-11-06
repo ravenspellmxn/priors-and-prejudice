@@ -1,9 +1,10 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Block Belief Machine</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap">
+<link rel="icon" href="data:,">
 <style>
+/* Self-hosted so the page makes no third-party request (Geist, SIL OFL 1.1, fonts/Geist-OFL.txt). */
+@font-face{font-family:'Geist';font-style:normal;font-weight:400 700;font-display:swap;src:url('fonts/Geist-Variable.woff2') format('woff2')}
+@font-face{font-family:'Geist Mono';font-style:normal;font-weight:400 600;font-display:swap;src:url('fonts/GeistMono-Variable.woff2') format('woff2')}
 /* Lab-bench look: tiled wall, enamel labels, glass sheets, chrome buttons, liquid as quantity. Day mode only. */
 :root{
   --ink:#0e2233;--ink2:#3a5264;--ink3:#5a6b78;
@@ -109,6 +110,7 @@ h1{font-family:var(--f-body);font-weight:700;font-size:clamp(28px,6vw,40px);lett
 
 /* sliders: glass track, chrome bead */
 input[type="range"]{-webkit-appearance:none;appearance:none;width:100%;height:8px;border-radius:4px;background:rgba(110,145,165,.28);box-shadow:inset 0 1px 2px rgba(14,34,51,.18);outline:none;margin:8px 0}
+input[type="range"]:focus-visible{outline:2.5px solid var(--tint-ink);outline-offset:4px}
 input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:24px;height:24px;border-radius:50%;background:var(--chrome);border:0;box-shadow:inset 0 1px 0 var(--hi),inset 0 -1px 0 rgba(0,0,0,.2),0 2px 6px var(--contact),0 0 0 2px var(--tint) inset;cursor:pointer}
 input[type="range"]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:var(--chrome);border:2px solid var(--tint);box-shadow:0 2px 6px var(--contact);cursor:pointer}
 input[type="range"]:disabled{opacity:.35}
@@ -279,7 +281,7 @@ footer ol li::before{content:counter(ln);position:absolute;left:14px;width:2.6em
           <label class="check"><input type="checkbox" id="sw-on"> Switch block mid-run</label>
           <div id="sw-body" hidden>
             <div class="row" style="margin-top:10px"><label for="s-swat">New block starts at trial</label><span class="rdval mono" id="v-swat">20</span></div>
-            <input type="range" id="s-swat" min="2" max="150" value="20" step="1">
+            <input type="range" id="s-swat" min="2" max="40" value="20" step="1">
             <div class="row" style="margin-top:10px"><label for="s-pr2">New block bias &middot; P(right)</label><span class="rdval mono" id="v-pr2">20%</span></div>
             <input type="range" class="bias" id="s-pr2" min="1" max="99" value="20" step="1">
             <div class="note">The observer is not told. Watch how many trials the block belief takes to flip. Try 80 / 20 to 20 / 80 with hazard 0, then with hazard 1/50.</div>
@@ -582,6 +584,14 @@ footer ol li::before{content:counter(ln);position:absolute;left:14px;width:2.6em
   // ---- SVG helpers ----
   var NS = "http://www.w3.org/2000/svg";
   var W = 760, ML = 46, MR = 98;
+  // Fit the drawing width to the chart column so labels render at true size on any screen.
+  // On a narrow phone the right gutter shrinks and the in-chart end labels drop out (the legend names each series).
+  function fitW() {
+    var c = document.querySelector(".chart");
+    var cw = c && c.clientWidth > 0 ? c.clientWidth : 760;
+    W = Math.round(cw);
+    MR = cw < 480 ? 16 : 98;
+  }
   function axisTitles(svg, H, yTitle, top, bot) {
     var xt = el("text", { x: ML + (W - ML - MR) / 2, y: H - 4, "text-anchor": "middle", class: "ytitle" });
     xt.textContent = "trial number"; svg.appendChild(xt);
@@ -644,7 +654,7 @@ footer ol li::before{content:counter(ln);position:absolute;left:14px;width:2.6em
       lab.textContent = (v > 0 ? "+" : "") + v.toFixed(1);
       svg.appendChild(lab);
     });
-    var tl = el("text", { x: W - MR + 8, y: y(0) + 3.5, class: "cend" }); tl.textContent = "0 = no lean"; svg.appendChild(tl);
+    if (MR > 40) { var tl = el("text", { x: W - MR + 8, y: y(0) + 3.5, class: "cend" }); tl.textContent = "0 = no lean"; svg.appendChild(tl); }
     axisTitles(svg, H, "what the mouse saw, m", top, bot);
     addSwitchMark(svg, top, bot);
     for (var t = 0; t < sim.stim.length; t++) {
@@ -681,7 +691,7 @@ footer ol li::before{content:counter(ln);position:absolute;left:14px;width:2.6em
       lab.textContent = Math.round(v * 100) + "%"; svg.appendChild(lab);
     });
     if (opts.hline !== undefined) {
-      svg.appendChild(el("line", { x1: ML, y1: y(opts.hline), x2: W - MR, y2: y(opts.hline), stroke: "var(--hair-strong)", "stroke-width": 1 }));
+      svg.appendChild(el("line", { x1: ML, y1: y(opts.hline), x2: W - MR, y2: y(opts.hline), stroke: "var(--hair-strong)", "stroke-width": 1, "stroke-dasharray": "4 3" }));
       var hl = el("text", { x: ML + 4, y: y(opts.hline) - 4, class: "clab" });
       hl.textContent = opts.hlineLabel; svg.appendChild(hl);
     }
@@ -695,7 +705,7 @@ footer ol li::before{content:counter(ln);position:absolute;left:14px;width:2.6em
       if (!s.faint) {
         var lastI = s.vals.length - 1 + (s.x0 || 0), lastV = s.vals[s.vals.length - 1];
         svg.appendChild(el("circle", { cx: xScale(lastI), cy: y(lastV), r: 4, fill: s.color, stroke: "var(--card)", "stroke-width": 2 }));
-        if (s.label) {
+        if (s.label && MR > 40) {
           var lab = el("text", { x: W - MR + 8, y: y(lastV) + 3.5, class: "cend" });
           lab.textContent = s.label; svg.appendChild(lab);
         }
@@ -953,6 +963,7 @@ footer ol li::before{content:counter(ln);position:absolute;left:14px;width:2.6em
 
   // ---- master render ----
   function render() {
+    fitW();
     var sim = simulate(st.seed);
     lastSim = sim;
     var avg = st.avg ? simulateMany() : null;
