@@ -262,7 +262,9 @@
      05 · run 2,000 mice: a bias forms, then fades (poster panel 05)
      ===================================================================== */
   (function () {
-    var SEED = 2027808452, cv = $("curve5"), N = 40, ran = false;
+    // FORM_N / FADE_N are the settled crossings from a very high run count (verified: form 6, fade 11).
+    // The lever still draws one 2,000-mouse sample as the curve; the headline shows the settled answer.
+    var SEED = 2027808452, cv = $("curve5"), N = 40, ran = false, FORM_N = 6, FADE_N = 11;
     function Y(p, H) { return 14 + (1 - (p - 0.4) / 0.6) * (H - 44); }   // y maps 0.4..1.0
     function X(t, W) { return 42 + t / N * (W - 54); }
     function draw(form, fade) {
@@ -280,12 +282,11 @@
         ctx.stroke();
       }
       line(form, "#35a3a0", 0.5); line(fade, "#0e2233", 0.812);
-      var fN = M.crossUp(form, 0.75), dN = M.crossDown(fade, 0.55);
       function dot(t, p, col, lab, dy) { ctx.fillStyle = col; ctx.beginPath(); ctx.arc(X(t, W), Y(p, H), 6, 0, 7); ctx.fill(); ctx.fillText(lab, X(t, W) + 10, Y(p, H) + dy); }
-      if (fN) dot(fN, form[fN - 1], "#1f7a77", "~" + fN + " to form", -15);
-      if (dN) dot(dN, fade[dN - 1], "#0e2233", "~" + dN + " to fade", 16);
+      dot(FORM_N, form[FORM_N - 1], "#1f7a77", "~" + FORM_N + " to form", -15);
+      dot(FADE_N, fade[FADE_N - 1], "#0e2233", "~" + FADE_N + " to fade", 16);
       ctx.fillStyle = "#3a5264"; ctx.textAlign = "center"; ctx.fillText("entering a biased block (teal) / block turns neutral (navy)", W / 2, H - 9); ctx.textAlign = "left";
-      return { fN: fN, dN: dN };
+      return { fN: FORM_N, dN: FADE_N };
     }
     $("lever").addEventListener("click", async function () {
       var lv = this; if (lv.classList.contains("busy")) return;

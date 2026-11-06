@@ -29,8 +29,8 @@ button{font-family:inherit;color:inherit}
 .wrap{position:relative;z-index:1;max-width:520px;margin:0 auto;padding-inline:18px;padding-block:22px 40px}
 
 /* type */
-.eyebrow{font:500 11.5px var(--mono);letter-spacing:.3em;text-transform:uppercase;color:var(--ink2);margin:0}
-.title{font-weight:700;letter-spacing:-.04em;line-height:1;margin:8px 0 0;text-wrap:balance}
+.eyebrow{font:500 12.5px var(--display);color:var(--ink2);margin:0}
+.title{font-weight:700;letter-spacing:-.015em;line-height:1;margin:8px 0 0;text-wrap:balance}
 h1.title{font-size:clamp(36px,10.5vw,50px)}
 h2.title{font-size:clamp(28px,8vw,36px)}
 .lede{font-size:16.5px;line-height:1.45;color:var(--ink2);margin:10px 0 0;text-wrap:pretty}
@@ -45,7 +45,7 @@ h2.title{font-size:clamp(28px,8vw,36px)}
   box-shadow:inset 0 0 0 2px var(--en1),inset 0 0 0 3.5px var(--ink),0 0 0 1px var(--steel2),0 3px 8px rgba(14,34,51,.18)}
 .plate .n{font:500 12px var(--mono);letter-spacing:.08em;color:var(--ink2)}
 .sheet{position:relative;border-radius:16px;padding:20px 18px;background:linear-gradient(180deg,var(--en1),#f2f5f6);box-shadow:0 0 0 1px var(--steel2),0 10px 24px rgba(14,34,51,.13)}
-.sheet::before{content:"";position:absolute;inset:7px;border:1.5px solid var(--ink);border-radius:10px;pointer-events:none}
+/* single clean edge per sheet (inner frame removed) */
 .sheet>*{position:relative}
 .paper{background:linear-gradient(180deg,var(--paper1),var(--paper2))}
 
@@ -76,7 +76,7 @@ h2.title{font-size:clamp(28px,8vw,36px)}
 .prompt{font-size:17px;line-height:1.4;font-weight:500;margin:0}
 .insight{font-size:17px;line-height:1.45;margin:0;padding:14px 16px;border-radius:12px;background:var(--tint-soft);border:1.5px solid color-mix(in srgb,var(--tint) 50%,transparent);transition:opacity .4s}
 .insight[hidden]{display:none}
-.insight b{font:600 11px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--tint-ink);display:block;margin-bottom:4px}
+.insight b{font:600 13px var(--display);color:var(--tint-ink);display:block;margin-bottom:4px}
 .draft{font:500 10.5px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--late);margin-left:6px}
 .stack{display:flex;flex-direction:column;gap:16px}
 .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
