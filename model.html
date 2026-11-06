@@ -53,19 +53,19 @@ body{margin:0;min-height:100%;color:var(--ink);font-family:var(--f-body);font-si
 .enamel.m>span{border-color:var(--mouse);color:var(--mouse)}
 
 header.top{margin-bottom:20px}
-.eyebrow{margin:0 0 10px;font:500 11.5px var(--f-mono);letter-spacing:.2em;text-transform:uppercase;color:var(--ink2)}
+.eyebrow{margin:0 0 10px;font:500 12px var(--f-body);color:var(--ink2)}
 .eyebrow a{color:inherit}
-h1{font-family:var(--f-body);font-weight:700;font-size:clamp(28px,6vw,40px);letter-spacing:-.035em;line-height:1.05;margin:0 0 10px;text-wrap:balance}
+h1{font-family:var(--f-body);font-weight:700;font-size:clamp(28px,6vw,40px);letter-spacing:-.01em;line-height:1.05;margin:0 0 10px;text-wrap:balance}
 .lede{color:var(--ink2);margin:0;max-width:66ch;font-size:16px}
 
 /* glass sheets */
 .tile,.panel,.howto div,.board .cell,.tooltip{background:var(--sheet);border:1px solid var(--sheet-edge);box-shadow:var(--shadow)}
 .panel,.tile{position:relative;background:linear-gradient(180deg,var(--en1),#f2f5f6)}
 .panel>*,.tile>*{position:relative;z-index:1}
-.panel::before,.tile::before{content:"";position:absolute;inset:7px;border:1.5px solid var(--ink);border-radius:8px;pointer-events:none;opacity:.8;z-index:0}
+/* single clean edge per container (inner frame removed) */
 .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:20px 0}
 .tile{border-radius:10px;padding:14px 15px;min-width:0}
-.tile .lbl{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);margin:0 0 8px}
+.tile .lbl{font-family:var(--f-body);font-size:12px;color:var(--ink3);margin:0 0 8px}
 .tile .val{font-size:26px;font-weight:600;letter-spacing:-.015em;line-height:1.15;font-variant-numeric:tabular-nums}
 .tile .sub{font-size:12.5px;color:var(--ink2);margin-top:4px}
 
@@ -95,7 +95,7 @@ h1{font-family:var(--f-body);font-weight:700;font-size:clamp(28px,6vw,40px);lett
 
 .panel{border-radius:10px;padding:20px;min-width:0}
 .panel+.panel{margin-top:16px}
-.panel h2{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink2);margin:0 0 14px;font-weight:600;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.panel h2{font-family:var(--f-body);font-size:14px;color:var(--ink);margin:0 0 14px;font-weight:600;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
 .panel h2 .hint{font-family:var(--f-body);font-weight:500;letter-spacing:0;text-transform:none;color:var(--ink3);font-size:12.5px}
 .panel.world{box-shadow:inset 3px 0 0 var(--world),var(--shadow)}
 .panel.observer{box-shadow:inset 3px 0 0 var(--mouse),var(--shadow)}
@@ -182,7 +182,7 @@ details.data summary{cursor:pointer;font-size:13.5px;color:var(--tint-ink);font-
 table{border-collapse:collapse;width:100%;font-size:12.5px;font-family:var(--f-mono);font-variant-numeric:tabular-nums}
 th,td{text-align:right;padding:6px 10px;border-bottom:1px solid var(--sheet-line);white-space:nowrap}
 th:first-child,td:first-child{text-align:left;color:var(--ink3)}
-thead th{color:var(--ink3);font-weight:600;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase}
+thead th{color:var(--ink3);font-weight:600;font-size:10.5px;letter-spacing:.04em}
 
 /* footer: the five steps as a numbered code block */
 footer{margin-top:28px;color:var(--ink2);font-size:13px;line-height:1.6;background:var(--code-bg);border:1px solid var(--sheet-line);border-radius:8px;padding:12px 14px 12px}
@@ -270,8 +270,8 @@ footer ol li::before{content:counter(ln);position:absolute;left:14px;width:2.6em
         </div>
 
         <div class="ctrl">
-          <div class="row"><label for="s-z">Sensory noise &zeta;</label><span class="rdval mono" id="v-z">1.00</span></div>
-          <input type="range" id="s-z" min="0.05" max="2" value="1" step="0.05">
+          <div class="row"><label for="s-z">Sensory noise &zeta;</label><span class="rdval mono" id="v-z">0.25</span></div>
+          <input type="range" id="s-z" min="0.05" max="2" value="0.25" step="0.05">
           <div class="note">The observation is <span class="mono">m = stim &times; contrast + &zeta; &times; noise</span>. What matters is contrast &divide; &zeta;. &zeta; = 0.25 is like a trained mouse: about 100% right at full contrast, about 60% at the lowest.</div>
         </div>
 
@@ -329,10 +329,10 @@ footer ol li::before{content:counter(ln);position:absolute;left:14px;width:2.6em
 
     <div>
       <div class="howto" aria-label="Reading order">
-        <div><b>1 &middot; The world makes a trial</b>It picks a direction and a contrast, then adds noise. First graph.</div>
-        <div><b>2 &middot; Which block am I in?</b>After each trial the mouse updates its belief about the block. Second graph.</div>
-        <div><b>3 &middot; Which way, this trial?</b>Before looking it expects one side. After looking it decides, then chooses. Third graph.</div>
-        <div><b>4 &middot; One trial as a grid</b>The same numbers for a single trial, with the two sums.</div>
+        <div><b>The world makes a trial</b>It picks a direction and a contrast, then adds noise. First graph.</div>
+        <div><b>Which block am I in?</b>After each trial the mouse updates its belief about the block. Second graph.</div>
+        <div><b>Which way, this trial?</b>Before looking it expects one side. After looking it decides, then chooses. Third graph.</div>
+        <div><b>One trial as a grid</b>The same numbers for a single trial, with the two sums.</div>
       </div>
       <div class="teach" id="teach"></div>
 
@@ -344,7 +344,7 @@ footer ol li::before{content:counter(ln);position:absolute;left:14px;width:2.6em
           <span><i style="background:var(--left)"></i>Filled dot = the truth, grating moved left</span>
           <span><i class="ring"></i>Hollow ring = what the mouse saw, m</span>
         </div>
-        <p class="caption"><b>How to read it.</b> Each column is one trial. The dot's height is the contrast, how strong the motion was. The ring is the dot plus noise, and the thin line between them is the noise. Above the zero line looks like right, below looks like left. The mouse only ever gets the ring.</p>
+        <p class="caption">Each column is one trial. The dot's height is the contrast, how strong the motion was. The ring is the dot plus noise, and the thin line between them is the noise. Above the zero line looks like right, below looks like left. The mouse only ever gets the ring.</p>
       </div>
 
       <div class="panel">
@@ -356,7 +356,7 @@ footer ol li::before{content:counter(ln);position:absolute;left:14px;width:2.6em
           <span><i class="line" style="border-color:var(--left)"></i>P(I am in an L-biased block)</span>
           <span id="lg-block-avg" hidden><i class="line" style="border-color:var(--faint);opacity:.5"></i>faint = this one sample, solid = mean of 500</span>
         </div>
-        <p class="caption"><b>How to read it.</b> Three lines, one per kind of block the mouse might be in. Height is how sure the mouse is after that trial, from 0% to 100%, and the three always add up to 100%. Trial 0 is before any evidence, all three at 33%. The line that climbs is the block it believes in. The dashed 90% line is a reference. The tile at the top counts trials until the prior settles (within 0.05 of where it ends up, for 5 trials in a row).</p>
+        <p class="caption">Three lines, one per kind of block the mouse might be in. Height is how sure the mouse is after that trial, from 0% to 100%, and the three always add up to 100%. Trial 0 is before any evidence, all three at 33%. The line that climbs is the block it believes in. The dashed 90% line is a reference. The tile at the top counts trials until the prior settles (within 0.05 of where it ends up, for 5 trials in a row).</p>
       </div>
 
       <div class="panel">
@@ -366,18 +366,18 @@ footer ol li::before{content:counter(ln);position:absolute;left:14px;width:2.6em
           <span><i class="line" style="border-color:var(--muted);opacity:.7"></i>Gray = prior &pi;, P(right) before looking, straight from the block belief</span>
           <span><i class="line" style="border-color:var(--right)"></i>Teal = posterior, P(right) after seeing m</span>
         </div>
-        <p class="caption" id="cap-dir"><b>How to read it.</b> Both lines answer "how likely is it that this trial's grating moved right." Gray is the expectation before looking, which is just the block belief from the graph above turned into a lean. Teal is after seeing m. Above 50% the mouse chooses right, below 50% it chooses left. Teal hugging gray means the mouse is trusting the block; teal jumping away from gray means the observation won.</p>
+        <p class="caption" id="cap-dir">Both lines answer "how likely is it that this trial's grating moved right." Gray is the expectation before looking, which is just the block belief from the graph above turned into a lean. Teal is after seeing m. Above 50% the mouse chooses right, below 50% it chooses left. Teal hugging gray means the mouse is trusting the block; teal jumping away from gray means the observation won.</p>
         <div class="legend" id="lg-acc" hidden>
           <span><i class="line" style="border-color:var(--acc)"></i>Mean accuracy at each trial, 500 runs</span>
         </div>
-        <p class="caption" id="cap-acc" hidden><b>How to read it.</b> Averaged over 500 runs: the share of runs where the choice on that trial was correct. Chance is 50%. It climbs as the block belief sharpens and the prior starts helping on faint trials.</p>
+        <p class="caption" id="cap-acc" hidden>Averaged over 500 runs: the share of runs where the choice on that trial was correct. Chance is 50%. It climbs as the block belief sharpens and the prior starts helping on faint trials.</p>
         <div class="chart" id="c-choice" style="margin-top:10px"></div>
         <div class="legend" id="lg-choice">
           <span><i style="background:var(--ok)"></i>Correct choice</span>
           <span><i style="background:var(--warn)"></i>Wrong choice</span>
           <span style="color:var(--faint)">top row = chose right, bottom row = chose left</span>
         </div>
-        <p class="caption"><b>Choices.</b> One dot per trial. Top row it chose right, bottom row it chose left. Teal means that choice matched the true direction, rose means it did not.</p>
+        <p class="caption">One dot per trial. Top row it chose right, bottom row it chose left. Teal means that choice matched the true direction, rose means it did not.</p>
       </div>
 
       <div class="panel">
@@ -430,7 +430,7 @@ footer ol li::before{content:counter(ln);position:absolute;left:14px;width:2.6em
 
   // ---- state ----
   var st = {
-    pRight: 0.80, n: 40, cMode: "fixed", cFixed: 0.125, zeta: 1.0,
+    pRight: 0.80, n: 40, cMode: "fixed", cFixed: 0.125, zeta: 0.25,
     switchOn: false, switchAt: 20, pRight2: 0.20,
     beta: 0.80, hazard: 0.02, lapse: 0.02, avg: false, inspect: 40, seed: 20260901
   };
