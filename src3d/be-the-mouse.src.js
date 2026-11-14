@@ -180,14 +180,14 @@ for (const s of [-1, 1]) {
   postAt(barEnd, -0.42, yL - 0.1, sp, 'spout');
 }
 const drops = {};
-for (const s of [-1, 1]) { drops[s] = mesh(new THREE.SphereGeometry(0.034, 16, 12), M.water, sp, V(tips[s].x, tips[s].y - 0.022, tips[s].z + 0.004), 'water-drop'); drops[s].scale.y = 1.2; }
+for (const s of [-1, 1]) { drops[s] = mesh(new THREE.SphereGeometry(0.045, 16, 12), M.water, sp, V(tips[s].x, tips[s].y - 0.022, tips[s].z + 0.004), 'water-drop'); drops[s].scale.y = 1.2; }
 
 // ---------- contact-circuit lick detector: two-LED indicator box, wired to the copper tape and spouts ----------
 const lk = part('lickbox');
 const LB = V(RX - 0.72, P0 + 0.09, -0.62);
 mesh(new RoundedBoxGeometry(0.34, 0.18, 0.24, 2, 0.02), M.black, lk, LB, 'led-box');
 const leds = {};
-for (const s of [-1, 1]) leds[s] = mesh(new THREE.SphereGeometry(0.028, 14, 10), look.flat(0x6b4a5c), lk, V(LB.x + s * 0.08, LB.y + 0.095, LB.z + s * 0.05), s > 0 ? 'led-right' : 'led-left');
+for (const s of [-1, 1]) leds[s] = mesh(new THREE.SphereGeometry(0.04, 14, 10), look.flat(0x6b4a5c), lk, V(LB.x + s * 0.08, LB.y + 0.095, LB.z + s * 0.05), s > 0 ? 'led-right' : 'led-left');
 const cuWire = new THREE.CatmullRomCurve3([V(RX - 0.31, AXIS - 0.1, TUBE.z0 + 0.1), V(RX - 0.45, P0 + 0.06, -0.1), V(LB.x + 0.05, P0 + 0.04, LB.z + 0.3), V(LB.x, LB.y, LB.z + 0.12)]);
 mesh(new THREE.TubeGeometry(cuWire, 40, 0.008, 6), M.redWire, lk, null, 'ground-wire');
 for (const s of [-1, 1]) mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([V(RX + s * 0.5, TIP.y - 0.3, -0.42), V(RX + s * 0.3, P0 + 0.03, -0.75), V(LB.x + s * 0.06, P0 + 0.03, LB.z + 0.25), V(LB.x + s * 0.06, LB.y - 0.02, LB.z + 0.12)]), 40, 0.008, 6), M.redWire, lk, null, 'spout-wire');
@@ -206,11 +206,15 @@ mesh(new RoundedBoxGeometry(0.7, 0.04, 0.4, 2, 0.015), M.chrome, mon, V(0, Y0 + 
   gTex.repeat.set(1, -1); gTex.offset.set(0, 1);   // canvas rows run top to bottom
   const screen = mesh(new THREE.PlaneGeometry(MON.sw, MON.sh), look.flat(0xffffff, { map: gTex }), mon, V(0, MON.y, MON.d / 2 + 0.002), 'screen'); screen.castShadow = false;
 
-  // camera: just behind and above the mouse's head, the screen filling most of the view, spouts at the bottom
-  const CAM = new URLSearchParams(location.search).get('cam');   // dev knob: "y,z,ty,fov"
-  const [cy, cz, ty, vf] = CAM ? CAM.split(',').map(Number) : [1.0, 0.7, -0.5, 54];
-  const target = V(MON.x, MON.y + ty, MON.z);
-  camera.position.set(RX, AXIS + cy, cz); camera.lookAt(target);
+  // camera: behind the mouse, LEVEL and square to the screen (no keystone). It sits a little above the screen's
+  // centre so the mouse and spouts drop below the screen; a vertical lens shift (not a tilt) frames both.
+  const CAM_Y = 5.4, CAM_Z = 6.5, CAM_X = MON.x + 1.3;   // high enough to see over the head bar, off to the right so the spouts and LED box show
+  camera.position.set(CAM_X, CAM_Y, CAM_Z); camera.lookAt(CAM_X, CAM_Y, MON.z);
+  // what must be in frame: the monitor's corners, the mouse's head, headcap and body, and both spout tips
+  const fitPts = [];
+  for (const sx of [-1, 1]) for (const sy of [-1, 1]) fitPts.push(V(MON.x + sx * MON.w / 2, MON.y + sy * MON.h / 2, MON.z + MON.d / 2));
+  fitPts.push(V(RX, AXIS + 0.24, 0.12), V(RX, AXIS - 0.3, 0.62), V(RX - 0.3, AXIS - 0.3, 0.9), V(RX + 0.3, AXIS - 0.3, 0.9), V(RX - 0.2, AXIS - 0.25, 1.05), V(RX + 0.2, AXIS - 0.25, 1.05));
+  for (const sx of [-1, 1]) fitPts.push(V(RX + sx * (TIP.x + 0.02), TIP.y - 0.05, TIP.z));
 
   // lick state, driven by app.js through lick(side, ok)
   const clamps = {};
@@ -241,8 +245,15 @@ mesh(new RoundedBoxGeometry(0.7, 0.04, 0.4, 2, 0.015), M.chrome, mon, V(0, Y0 + 
   function resize() {
     const w = Math.max(1, container.clientWidth), h = Math.max(1, container.clientHeight);
     renderer.setSize(w, h, false); camera.aspect = w / h;
-    camera.fov = vf;   // vertical fov tuned so the screen fills most of the view and the spouts show at the bottom
+    // slopes of every fit point seen from the level camera
+    let top = -Infinity, bot = Infinity, lft = Infinity, rgt = -Infinity;
+    for (const p of fitPts) { const d = CAM_Z - p.z, y = (p.y - CAM_Y) / d, x = (p.x - CAM_X) / d; top = Math.max(top, y); bot = Math.min(bot, y); lft = Math.min(lft, x); rgt = Math.max(rgt, x); }
+    const m = 1.06, halfH = Math.max((top - bot) / 2, (rgt - lft) / 2 / camera.aspect) * m, centre = (top + bot) / 2, centreX = (lft + rgt) / 2;
+    camera.fov = THREE.MathUtils.radToDeg(2 * Math.atan(halfH));
     camera.updateProjectionMatrix();
+    camera.projectionMatrix.elements[9] = centre / halfH;   // lens shift, not a tilt: the view stays level and square, so the screen stays a rectangle
+    camera.projectionMatrix.elements[8] = centreX / (halfH * camera.aspect);
+    camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
   }
   const ro = new ResizeObserver(resize); ro.observe(container);
   container.appendChild(canvas); resize();
