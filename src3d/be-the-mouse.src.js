@@ -215,10 +215,10 @@ mesh(new RoundedBoxGeometry(0.7, 0.04, 0.4, 2, 0.015), M.chrome, mon, V(0, Y0 + 
   for (const sx of [-1, 1]) for (const sy of [-1, 1]) fitPts.push(V(MON.x + sx * MON.w / 2, MON.y + sy * MON.h / 2, MON.z + MON.d / 2));
   for (const sx of [-1, 1]) fitPts.push(V(RX + sx * 0.24, AXIS + 0.2, 0.2), V(RX + sx * 0.27, AXIS - 0.12, 0.5));
 
-  // loupe: a second camera close on the snout and both spouts, from just under the chin,
+  // loupe: a second camera on the head and both spouts in side profile,
   // drawn into a render target in the same renderer, then shown as a round glass inset with a chrome rim
-  const loupe = new THREE.PerspectiveCamera(40, 1, 0.01, 20);
-  loupe.position.set(RX, AXIS - 0.27, -0.02); loupe.lookAt(RX, AXIS - 0.08, -0.28);   // under the chin, facing forward: the mouse's left stays on the left
+  const loupe = new THREE.PerspectiveCamera(34, 1, 0.05, 1.75);   // short far plane: the rig behind drops out, leaving plain glass
+  loupe.position.set(RX + 1.0, AXIS + 0.3, -0.7); loupe.lookAt(RX, AXIS - 0.06, -0.3);   // side profile from the mouse's right, a little forward so the near and far spouts separate
   const rt = new THREE.WebGLRenderTarget(256, 256, { samples: 4 }); rt.texture.colorSpace = THREE.SRGBColorSpace;
   const ov = new THREE.Scene(), ovCam = new THREE.OrthographicCamera(0, 1, 1, 0, -1, 1);
   const lens = new THREE.Mesh(new THREE.CircleGeometry(0.5, 64), new THREE.MeshBasicMaterial({ map: rt.texture }));
@@ -271,7 +271,7 @@ mesh(new RoundedBoxGeometry(0.7, 0.04, 0.4, 2, 0.015), M.chrome, mon, V(0, Y0 + 
     camera.projectionMatrix.elements[8] = centreX / (halfH * camera.aspect);
     camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
     // loupe inset: about 30% of the window width, bottom right
-    const d = Math.round(Math.min(w * 0.3, h * 0.45)), mg = Math.round(d * 0.08) + 4, cx = w - mg - d / 2, cy = mg + d / 2;
+    const d = Math.round(Math.min(w * 0.35, h * 0.5)), mg = Math.round(d * 0.08) + 4, cx = w - mg - d / 2, cy = mg + d / 2;
     ovCam.left = 0; ovCam.right = w; ovCam.top = h; ovCam.bottom = 0; ovCam.updateProjectionMatrix();
     for (const o of [lens, rim, edge, sheen]) { o.position.set(cx, cy, 0); o.scale.set(d, d, 1); }
     const px = Math.min(512, Math.round(d * Math.min(2, window.devicePixelRatio || 1)));
