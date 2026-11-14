@@ -182,7 +182,7 @@
       mini(pbBefore); $("vv0").textContent = pct(pbBefore[0]) + " R";
       ["l1", "l2", "l3", "l4"].forEach(function (id) { setLv($(id), 0); });
       ["vv1", "vv2", "vv3", "vv4"].forEach(function (id) { $(id).textContent = "·"; });
-      $("evd").classList.remove("in"); $("spL").classList.remove("lit"); $("spR").classList.remove("lit");
+      $("evd").classList.remove("in"); $("spL").classList.remove("lit", "wet"); $("spR").classList.remove("lit", "wet");
       $("st3").innerHTML = "It has seen " + warm + " trials of this block. Its belief: <span class=\"mono\">" + pct(pbBefore[0]) + "</span> mostly-right, <span class=\"mono\">" + pct(pbBefore[1]) + "</span> even, <span class=\"mono\">" + pct(pbBefore[2]) + "</span> mostly-left.";
       $("step3").disabled = false; $("step3").textContent = "Step ▸";
     }
@@ -208,6 +208,7 @@
         $("st3").innerHTML = "<b>Choice.</b> It chooses the side with the higher posterior: <span class=\"mono\">" + (R ? "right" : "left") + "</span>.";
       } else if (step === 5) {
         var ok = trial.correct, R2 = trial.stim === 1;
+        if (ok) $(trial.choice === 1 ? "spR" : "spL").classList.add("wet");   /* a drop on the licked spout when rewarded, as in 06 */
         mini(pbAfter); $("vv0").textContent = pct(pbAfter[0]) + " R"; V[0].classList.add("on");
         $("st3").innerHTML = "<b>Feedback.</b> The grating really moved <span class=\"mono\">" + (R2 ? "right" : "left") + "</span>, so the choice was " + (ok ? "rewarded" : "not rewarded") + ". Knowing the true side, it updates its block belief to <span class=\"mono\">" + pct(pbAfter[0]) + "</span> mostly-right. That becomes the next trial's prior.";
         $("step3").disabled = true; done++;

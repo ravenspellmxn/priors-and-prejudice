@@ -4,7 +4,6 @@
 // Visual only: the game logic, timing and scoring stay in app.js. Build: node build-3d.mjs -> be-the-mouse.js
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
-import { createStrokedToon } from './stroked-toon.js';
 
 const Y0 = 0.125, P0 = Y0 + 0.08;
 const RX = -0.6;
@@ -25,12 +24,19 @@ export function mount(container, gratingCanvas, { onLick = () => {}, reduceMotio
   canvas.setAttribute('role', 'img');
   canvas.setAttribute('aria-label', 'Three dimensional view from behind a toy mouse at the lab rig: the grating screen ahead and the mouse\'s head below it. A round loupe in the bottom right corner shows the snout and both lick spouts up close: the tongue reaching a spout, the lick light, and a water drop after a correct lick. Use the LEFT and RIGHT buttons to lick.');
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-  const look = createStrokedToon(renderer, { ink: 0x1a2a38, dpr: Math.min(2, window.devicePixelRatio || 1) });
-  renderer.shadowMap.enabled = true;
+  // soft shading to match the site's flat glass-and-chrome instruments: no outline pass, standard materials, gentle light
+  renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+  renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.NoToneMapping;
+  renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap; renderer.setClearColor(0x000000, 0);
+  const look = {
+    toon(color, { outline, stroke, ...o } = {}) { return new THREE.MeshStandardMaterial({ color, roughness: 0.62, metalness: 0, ...o }); },
+    flat(color, o = {}) { return new THREE.MeshBasicMaterial({ color, ...o }); },
+    render(sc, cam) { renderer.render(sc, cam); },
+  };
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(40, 4 / 3, 0.05, 50);
-  scene.add(new THREE.HemisphereLight(0xfffaf0, 0xc9cdd4, 1.55));
-  const key = new THREE.DirectionalLight(0xfff3e0, 2.55);
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xb9c6d0, 1.35));
+  const key = new THREE.DirectionalLight(0xffffff, 1.35);
   key.position.set(-6, 9, 3); key.castShadow = true; key.shadow.mapSize.set(1024, 1024);
   Object.assign(key.shadow.camera, { left: -3, right: 3, top: 3, bottom: -3, near: 1, far: 25 });
   key.shadow.bias = -0.0004; key.shadow.normalBias = 0.02; scene.add(key);
@@ -40,15 +46,15 @@ const steelTex = (() => { const c = document.createElement('canvas'); c.width = 
   [[0, '#b6bfc6'], [0.45, '#f4f6f7'], [0.55, '#d0d6db'], [1, '#9aa4ac']].forEach(([o, col]) => gr.addColorStop(o, col)); g.fillStyle = gr; g.fillRect(0, 0, 256, 4);
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; })();
 const M = {
-  slab: look.toon(0xfdfefd), cabinet: look.toon(0xa9bccb), door: look.toon(0xd3e0e9), chrome: look.toon(0xffffff, { map: steelTex }), board_side: look.toon(0x3b4650), printed: look.toon(0xc3cad0), copper: look.toon(0xb36b45),
-  steel: look.toon(0xd5dbe0), black: look.toon(0x3b4650), cement: look.toon(0xf1ece1), whiteBar: look.toon(0xfdfefd),
+  slab: look.toon(0xfdfefd), cabinet: look.toon(0xa9bccb), door: look.toon(0xd3e0e9), chrome: look.toon(0xffffff, { map: steelTex, roughness: 0.32 }), board_side: look.toon(0x3b4650), printed: look.toon(0xc3cad0), copper: look.toon(0xb36b45),
+  steel: look.toon(0xffffff, { map: steelTex, roughness: 0.32 }), black: look.toon(0x3b4650), cement: look.toon(0xf1ece1), whiteBar: look.toon(0xfdfefd),
   fur: look.toon(0xdcdadb), belly: look.toon(0xc7bcb0), pink: look.toon(0xe3a59c), tail: look.toon(0xd98f86), eye: look.toon(0x9e2a33), whisker: look.toon(0xf7f6f3, { outline: false }),
   frame: look.toon(0x3b4650), stand: look.toon(0x3b4650), hub: look.toon(0x1f7a77), redWire: look.toon(0xb93179, { outline: false }),
   line: look.toon(0xf3f7f9, { outline: false }), cable: look.toon(0x3a5264, { outline: false }),
   waterCol: look.toon(0x9fd6d3, { outline: false }),
-  water: look.toon(0x9fd6d3, { outline: false }), tongue: look.toon(0xe58f97),
+  water: look.toon(0x35a3a0, { roughness: 0.15, emissive: 0x1f7a77, emissiveIntensity: 0.25 }), tongue: look.toon(0xe58f97),
   tray: look.toon(0xaeb6bd), board: look.toon(0xeceff0), roller: look.toon(0xaeb6bd), sign: look.toon(0xfdfefd),
-  glass: look.toon(0xf3f7f9, { transparent: true, opacity: 0.3, depthWrite: false, stroke: 0.0022 }),
+  glass: look.toon(0xf3f7f9, { transparent: true, opacity: 0.3, depthWrite: false, roughness: 0.1 }),
 };
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
 function mesh(geo, mat, parent, pos, name) {
@@ -230,11 +236,9 @@ mesh(new RoundedBoxGeometry(0.7, 0.04, 0.4, 2, 0.015), M.chrome, mon, V(0, Y0 + 
   const rt = new THREE.WebGLRenderTarget(256, 256, { samples: 4 }); rt.texture.colorSpace = THREE.SRGBColorSpace;
   const ov = new THREE.Scene(), ovCam = new THREE.OrthographicCamera(0, 1, 1, 0, -1, 1);
   const lens = new THREE.Mesh(new THREE.CircleGeometry(0.5, 64), new THREE.MeshBasicMaterial({ map: rt.texture }));
-  const rim = new THREE.Mesh(new THREE.RingGeometry(0.5, 0.56, 64), new THREE.MeshBasicMaterial({ map: steelTex }));
-  const edge = new THREE.Mesh(new THREE.RingGeometry(0.56, 0.575, 64), new THREE.MeshBasicMaterial({ color: 0x8f9aa3 }));
-  // glass sheen across the lens (wetlab .glass highlight)
-  const sheen = new THREE.Mesh(new THREE.RingGeometry(0.36, 0.47, 48, 1, Math.PI * 0.58, Math.PI * 0.42), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.35, depthTest: false }));
-  ov.add(lens, rim, edge, sheen);
+  ov.add(lens);
+  // the loupe's glass and rim are the same .glass treatment as the vessels and burettes (wetlab.css), laid over the lens
+  const loupeGlass = document.createElement('div'); loupeGlass.className = 'glass bm-loupe'; loupeGlass.setAttribute('aria-hidden', 'true');
 
   // lick state, driven by app.js through lick(side, ok)
   const clamps = {};
@@ -283,12 +287,13 @@ mesh(new RoundedBoxGeometry(0.7, 0.04, 0.4, 2, 0.015), M.chrome, mon, V(0, Y0 + 
     // loupe inset: about 30% of the window width, bottom right
     const d = Math.round(Math.min(w * 0.35, h * 0.5)), mg = Math.round(d * 0.08) + 4, cx = w - mg - d / 2, cy = mg + d / 2;
     ovCam.left = 0; ovCam.right = w; ovCam.top = h; ovCam.bottom = 0; ovCam.updateProjectionMatrix();
-    for (const o of [lens, rim, edge, sheen]) { o.position.set(cx, cy, 0); o.scale.set(d, d, 1); }
+    lens.position.set(cx, cy, 0); lens.scale.set(d, d, 1);
+    Object.assign(loupeGlass.style, { width: d + 'px', height: d + 'px', right: mg + 'px', bottom: mg + 'px' });
     const px = Math.min(512, Math.round(d * Math.min(2, window.devicePixelRatio || 1)));
     rt.setSize(px, px);
   }
   const ro = new ResizeObserver(resize); ro.observe(container);
-  container.appendChild(canvas); resize();
+  container.appendChild(canvas); container.appendChild(loupeGlass); resize();
   // tapping a spout in 3D licks it (the buttons stay the primary control)
   const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), hits = [];
   sp.traverse(o => o.isMesh && hits.push(o));

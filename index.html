@@ -41,6 +41,28 @@
 /* 06 in 3D: the tiled wall behind the rig (wetlab.css grout), the trial line on an enamel plate */
 #win6.is3d{background:linear-gradient(var(--grout) 1px,transparent 1px) 0 0/72px 72px,linear-gradient(90deg,var(--grout) 1px,transparent 1px) 0 0/72px 72px,linear-gradient(180deg,var(--wall-a),var(--wall-b))}
 #cnt6.plate{align-self:flex-start}
+/* cohesion: 01's grating in the same 16:9 chrome monitor as 06 (steelG bezel, narrow neck, flat base) */
+.monitor{display:flex;flex-direction:column;align-items:center;width:100%}
+.monitor .bezel{width:100%;padding:5px;border-radius:9px;background:linear-gradient(90deg,#b6bfc6 0%,#f4f6f7 45%,#d0d6db 55%,#9aa4ac 100%);box-shadow:inset 0 0 0 1px #8f9aa3,0 4px 10px rgba(14,34,51,.18)}
+.monitor .bezel canvas{display:block;width:100%;aspect-ratio:16/9;border-radius:4px;background:#7d8790}
+.monitor .neck{width:12%;height:14px;background:linear-gradient(90deg,#b6bfc6 0%,#f4f6f7 45%,#d0d6db 55%,#9aa4ac 100%)}
+.monitor .foot{width:46%;height:7px;border-radius:3px;background:linear-gradient(90deg,#b6bfc6 0%,#f4f6f7 45%,#d0d6db 55%,#9aa4ac 100%);box-shadow:inset 0 0 0 1px #8f9aa3}
+/* cohesion: 03's spouts as chrome hairpins, lit on the choice, a teal drop when rewarded */
+.spouts .spout{width:auto;height:auto;border-radius:0;background:none;box-shadow:none;display:flex;flex-direction:column;align-items:center;gap:4px}
+.spouts .spout svg{width:40px;height:52px;overflow:visible}
+.spouts .spout .tube{fill:none;stroke:#8f9aa3;stroke-width:6;stroke-linecap:round}
+.spouts .spout .tubehi{fill:none;stroke:url(#steelG);stroke-width:4;stroke-linecap:round}
+.spouts .spout .tip{fill:#d5dbe0;transition:fill .2s}
+.spouts .spout .wetdrop{fill:url(#liqG);opacity:0;transform:translateY(-6px);transition:opacity .25s,transform .35s var(--slosh)}
+.spouts .spout b{font:600 13px var(--mono);color:var(--ink2);padding:2px 8px;border-radius:6px}
+.spouts .spout.lit{background:none;color:inherit;box-shadow:none}
+.spouts .spout.lit .tip{fill:var(--tint)}
+.spouts .spout.lit b{background:var(--ink);color:var(--en1)}
+.spouts .spout.wet .wetdrop{opacity:1;transform:none}
+/* cohesion: 06's loupe glass is the vessels' .glass, laid over the 3D lens */
+#win6{position:relative}
+#win6 .bm-loupe{position:absolute;border-radius:50%;pointer-events:none}
+
 .knobrow{display:flex;align-items:center;gap:16px}
 .knob{position:relative;width:108px;height:108px;flex:none;border-radius:50%;touch-action:none;cursor:grab;
   background:radial-gradient(circle at 38% 30%,#ffffff 0 10%,#e3e8eb 30%,#a9b3ba 72%,#8a959d 100%);
@@ -217,7 +239,7 @@
   <div class="instrument">
     <div class="s1grid">
       <div class="stack" style="gap:14px">
-        <div class="window"><canvas id="g1" width="320" height="240" aria-label="Drifting grating"></canvas></div>
+        <div class="monitor"><div class="bezel"><canvas id="g1" width="426" height="240" aria-label="Drifting grating"></canvas></div><i class="neck"></i><i class="foot"></i></div>
         <div class="knobrow">
           <div class="knob" id="knob" role="slider" tabindex="0" aria-label="Contrast" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><span class="knobring"></span></div>
           <div class="knobread"><span class="cap">contrast</span><span class="big" id="k-val">1.00</span><span class="cap" id="k-word">strong</span></div>
@@ -274,7 +296,7 @@
       <div class="vessel" id="v4"><div class="glass"><i class="liq" id="l4" style="--lv:0%;--c:#0e2233"></i></div><span class="nm">choice</span><span class="val" id="vv4">·</span></div>
     </div>
     <div class="evscale" id="evs"><span class="mid"></span><span class="lab" style="left:10px">looks left</span><span class="lab" style="right:10px">looks right</span><span class="evdrop" id="evd"></span></div>
-    <div class="spouts"><span class="spout" id="spL">L</span><span class="spout" id="spR">R</span></div>
+    <div class="spouts"><span class="spout" id="spL"><svg viewBox="0 0 40 52" aria-hidden="true"><path class="tube" d="M12 2V30c0 9 16 9 16 0V16"/><path class="tubehi" d="M12 2V30c0 9 16 9 16 0V16"/><circle class="tip" cx="28" cy="15" r="2.6"/><circle class="wetdrop" cx="28" cy="20" r="4.6"/></svg><b>L</b></span><span class="spout" id="spR"><svg viewBox="0 0 40 52" aria-hidden="true"><path class="tube" d="M12 2V30c0 9 16 9 16 0V16"/><path class="tubehi" d="M12 2V30c0 9 16 9 16 0V16"/><circle class="tip" cx="28" cy="15" r="2.6"/><circle class="wetdrop" cx="28" cy="20" r="4.6"/></svg><b>R</b></span></div>
     <p class="steptext" id="st3"></p>
     <div class="row"><button class="key" id="step3">Step ▸</button><button class="chrome" id="new3">New trial</button></div>
   </div>
