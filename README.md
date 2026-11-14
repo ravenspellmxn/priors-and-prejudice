@@ -1,6 +1,6 @@
 # Priors and Prejudice: poster companion
 
-Hands-on stations for the ABRCMS 2026 poster *Priors and Prejudice: How many trials does a Bayesian observer need to learn a changing prior?* (Raven Spellman, Alyssa Romportl, Gidon Felsen, Tahra Eissa).
+Hands-on stations for the ABRCMS 2026 poster *Priors and Prejudice: How many trials does a Bayesian observer need to learn a changing environment?* (Raven Spellman, Alyssa Romportl, Gidon Felsen, Tahra Eissa).
 
 Open it: https://ravenspellmxn.github.io/priors-and-prejudice/
 
