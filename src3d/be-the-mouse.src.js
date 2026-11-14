@@ -15,7 +15,8 @@ const HEAD = { c: new THREE.Vector3(RX, AXIS + 0.0, 0.1), s: [0.19, 0.18, 0.22] 
 const MOUTH = new THREE.Vector3(RX, AXIS - 0.07, -0.2);
 const TIP = { x: 0.06, y: AXIS - 0.08, z: -0.27 };
 // same monitor as the diorama, with a 4:3 screen to match the site's 320x240 grating canvas
-const MON = { x: RX, y: Y0 + 0.78, z: -1.55, yaw: 0, w: 1.7, h: 1.45, d: 0.08, sw: 1.56, sh: 1.17 };
+// 16:9 like the rig's 1920x1080 display and the poster's monitor, thin even bezel (same model as the diorama)
+const MON = { x: RX, y: Y0 + 0.72, z: -1.55, yaw: 0, w: 1.64, h: 0.9575, d: 0.07, sw: 1.56, sh: 0.8775 };
 const C = { ink: '#0e2233', graphite: '#3b4650', en1: '#fdfefd', en2: '#eceff0', steel2: '#aeb6bd', tint: '#35a3a0' };
 
 export function mount(container, gratingCanvas, { onLick = () => {}, reduceMotion = false } = {}) {
@@ -203,7 +204,12 @@ mesh(new RoundedBoxGeometry(0.7, 0.04, 0.4, 2, 0.015), M.chrome, mon, V(0, Y0 + 
   // the screen: the site's own grating canvas, updated every frame
   // read the 2D canvas's pixels each frame (a canvas-to-texture upload tore on some GPUs; pixels are robust)
   const gCtx = gratingCanvas.getContext('2d'), GW = gratingCanvas.width, GH = gratingCanvas.height;
-  const gTex = new THREE.DataTexture(new Uint8Array(GW * GH * 4), GW, GH, THREE.RGBAFormat);
+  // the game's canvas is 4:3; the screen is 16:9 at the same height, so the bars keep their width. The side margins
+  // repeat the game's own columns two grating periods away (period 38 px), which is the same phase: no stretch, no seam.
+  const TW = Math.round(GH * 16 / 9 / 2) * 2, ML = (TW - GW) / 2, SHIFT = 2 * 38;
+  const gTex = new THREE.DataTexture(new Uint8Array(TW * GH * 4), TW, GH, THREE.RGBAFormat);
+  const srcCol = new Int32Array(TW);
+  for (let X = 0; X < TW; X++) { const x = X - ML; srcCol[X] = x < 0 ? x + SHIFT : x >= GW ? x - SHIFT : x; }
   gTex.colorSpace = THREE.SRGBColorSpace; gTex.minFilter = gTex.magFilter = THREE.LinearFilter;
   gTex.repeat.set(1, -1); gTex.offset.set(0, 1);   // canvas rows run top to bottom
   const screen = mesh(new THREE.PlaneGeometry(MON.sw, MON.sh), look.flat(0xffffff, { map: gTex }), mon, V(0, MON.y, MON.d / 2 + 0.002), 'screen'); screen.castShadow = false;
@@ -239,7 +245,9 @@ mesh(new RoundedBoxGeometry(0.7, 0.04, 0.4, 2, 0.015), M.chrome, mon, V(0, Y0 + 
   let lk0 = -1e9, side = 1, ok = false;
   const smooth = (a, b, x) => { const u = Math.min(1, Math.max(0, (x - a) / (b - a))); return u * u * (3 - 2 * u); };
   function frame(now) {
-    gTex.image.data.set(gCtx.getImageData(0, 0, GW, GH).data); gTex.needsUpdate = true;
+    const src = gCtx.getImageData(0, 0, GW, GH).data, dst = gTex.image.data;
+    for (let y = 0; y < GH; y++) { const so = y * GW * 4, dO = y * TW * 4; for (let X = 0; X < TW; X++) { const a = so + srcCol[X] * 4, b = dO + X * 4; dst[b] = src[a]; dst[b + 1] = src[a + 1]; dst[b + 2] = src[a + 2]; dst[b + 3] = 255; } }
+    gTex.needsUpdate = true;
     const t = (now - lk0) / 1000;                       // seconds since the lick
     const ext = t >= 0 ? smooth(0, 0.07, t) * (1 - smooth(0.3, 0.42, t)) : 0;   // out, hold at the spout, back: all inside the game's 500 ms gap
     const tip = tips[side];
