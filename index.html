@@ -38,6 +38,9 @@
 .window.is3d #g6{display:none}
 .window.is3d .bm3d{cursor:pointer;touch-action:manipulation}
 #cap6{margin:-6px 0 0}
+/* 06 in 3D: the tiled wall behind the rig (wetlab.css grout), the trial line on an enamel plate */
+#win6.is3d{background:linear-gradient(var(--grout) 1px,transparent 1px) 0 0/72px 72px,linear-gradient(90deg,var(--grout) 1px,transparent 1px) 0 0/72px 72px,linear-gradient(180deg,var(--wall-a),var(--wall-b))}
+#cnt6.plate{align-self:flex-start}
 .knobrow{display:flex;align-items:center;gap:16px}
 .knob{position:relative;width:108px;height:108px;flex:none;border-radius:50%;touch-action:none;cursor:grab;
   background:radial-gradient(circle at 38% 30%,#ffffff 0 10%,#e3e8eb 30%,#a9b3ba 72%,#8a959d 100%);
@@ -329,7 +332,7 @@
   <div class="instrument">
     <div class="window flash" id="win6"><canvas id="g6" width="320" height="240" aria-label="Grating for this trial"></canvas></div>
     <p class="cap" id="cap6" hidden>The lab's rig, simplified</p>
-    <div class="counter" id="cnt6">Tap Start</div>
+    <div class="counter plate" id="cnt6">Tap Start</div>
     <div class="gamebtns"><button class="spout" id="lickL" disabled>← LEFT</button><button class="spout" id="lickR" disabled>RIGHT →</button></div>
     <div class="row"><button class="key" id="start6">Start</button></div>
     <div class="score" id="score6" hidden>

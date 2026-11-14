@@ -41,7 +41,7 @@ const steelTex = (() => { const c = document.createElement('canvas'); c.width = 
 const M = {
   slab: look.toon(0xfdfefd), cabinet: look.toon(0xa9bccb), door: look.toon(0xd3e0e9), chrome: look.toon(0xffffff, { map: steelTex }), board_side: look.toon(0x3b4650), printed: look.toon(0xc3cad0), copper: look.toon(0xb36b45),
   steel: look.toon(0xd5dbe0), black: look.toon(0x3b4650), cement: look.toon(0xf1ece1), whiteBar: look.toon(0xfdfefd),
-  fur: look.toon(0x2b3a46), pink: look.toon(0xe7a7a4), eye: look.toon(0x0e2233), whisker: look.toon(0xaeb6bd, { outline: false }),
+  fur: look.toon(0xdcdadb), belly: look.toon(0xc7bcb0), pink: look.toon(0xe3a59c), tail: look.toon(0xd98f86), eye: look.toon(0x9e2a33), whisker: look.toon(0xf7f6f3, { outline: false }),
   frame: look.toon(0x3b4650), stand: look.toon(0x3b4650), hub: look.toon(0x1f7a77), redWire: look.toon(0xb93179, { outline: false }),
   line: look.toon(0xf3f7f9, { outline: false }), cable: look.toon(0x3a5264, { outline: false }),
   waterCol: look.toon(0x9fd6d3, { outline: false }),
@@ -113,17 +113,19 @@ mesh(new THREE.ExtrudeGeometry(cu, { depth: 0.24, bevelEnabled: false, curveSegm
 mesh(new RoundedBoxGeometry(0.36, 0.08, 0.22, 2, 0.02), M.printed, plat, V(RX, AXIS - TUBE.r - TUBE.t - 0.04, 0.72), 'tube-clamp');
 postAt(RX, 0.72, AXIS - TUBE.r - TUBE.t - 0.08, plat, 'tube');
 
-// ---------- the mouse (toy; black fur like the lab's mice) ----------
+// ---------- the mouse (toy albino lab mouse, matching the poster's BioRender mouse) ----------
 const mouse = part('mouse');
 const bodyM = mesh(new THREE.SphereGeometry(1, 40, 28), M.fur, mouse, BODY.c, 'body'); bodyM.scale.set(...BODY.s);
+// warm beige underside, as in the poster's mouse
+const belly = mesh(new THREE.SphereGeometry(1, 32, 20), M.belly, mouse, BODY.c.clone().add(V(0, -0.045, 0.01)), 'belly'); belly.scale.set(BODY.s[0] * 0.93, BODY.s[1] * 0.85, BODY.s[2] * 0.95);
 const headM = mesh(new THREE.SphereGeometry(1, 40, 28), M.fur, mouse, HEAD.c, 'head'); headM.scale.set(...HEAD.s);
-const snout = mesh(new THREE.SphereGeometry(1, 28, 20), M.fur, mouse, V(RX, AXIS - 0.04, -0.07), 'snout'); snout.scale.set(0.1, 0.09, 0.15);
-mesh(new THREE.SphereGeometry(0.03, 16, 12), M.pink, mouse, V(RX, AXIS - 0.03, -0.215), 'nose');
+const snout = mesh(new THREE.SphereGeometry(1, 28, 20), M.fur, mouse, V(RX, AXIS - 0.04, -0.07), 'snout'); snout.scale.set(0.085, 0.08, 0.19);   // tapers to a pointed snout
+mesh(new THREE.SphereGeometry(0.03, 16, 12), M.pink, mouse, V(RX, AXIS - 0.035, -0.255), 'nose');
 const ears = [];
 for (const s of [-1, 1]) {
   const ear = new THREE.Group(); ear.position.set(RX + s * 0.15, AXIS + 0.12, 0.2); mouse.add(ear);
-  const e = mesh(new THREE.SphereGeometry(1, 24, 16), M.fur, ear, V(0, 0.05, 0), 'ear'); e.scale.set(0.08, 0.08, 0.024);
-  const ei = mesh(new THREE.SphereGeometry(1, 20, 14), M.pink, ear, V(0, 0.05, -0.011), 'ear-inner'); ei.scale.set(0.055, 0.055, 0.016);
+  const e = mesh(new THREE.SphereGeometry(1, 24, 16), M.pink, ear, V(0, 0.05, 0), 'ear'); e.scale.set(0.08, 0.08, 0.024);
+  const ei = mesh(new THREE.SphereGeometry(1, 20, 14), M.pink, ear, V(0, 0.05, -0.011), 'ear-inner'); ei.scale.set(0.055, 0.055, 0.016); ei.material = M.tail;
   ear.rotation.set(-0.15, 0, -s * 0.75);
   ears.push(ear);
   mesh(new THREE.SphereGeometry(0.028, 16, 12), M.eye, mouse, V(RX + s * 0.11, AXIS + 0.04, -0.04), 'eye');
@@ -140,7 +142,7 @@ for (const s of [-1, 1]) {
 }
 const whiskers = ears.filter(o => o.userData.side);
 const tailCurve = new THREE.CatmullRomCurve3([V(RX, AXIS - 0.1, 1.0), V(RX, AXIS - 0.12, 1.25), V(RX + 0.1, P0 + 0.14, 1.32), V(RX + 0.3, P0 + 0.03, 1.2), V(RX + 0.45, P0 + 0.03, 0.95)]);
-mesh(new THREE.TubeGeometry(tailCurve, 40, 0.022, 10), M.pink, mouse, null, 'tail');
+mesh(new THREE.TubeGeometry(tailCurve, 40, 0.022, 10), M.tail, mouse, null, 'tail');
 const tongue = new THREE.Group(); tongue.position.copy(MOUTH); mouse.add(tongue);
 const tongueGeo = new THREE.CapsuleGeometry(0.026, 0.06, 6, 12); tongueGeo.translate(0, 0.05, 0);
 const tongueM = mesh(tongueGeo, M.tongue, tongue, null, 'tongue');
@@ -251,7 +253,7 @@ mesh(new RoundedBoxGeometry(0.7, 0.04, 0.4, 2, 0.015), M.chrome, mon, V(0, Y0 + 
       drops[s].visible = show;
       if (show) { const g = smooth(0.07, 0.14, t) * (1 - smooth(0.34, 0.49, t)); drops[s].scale.set(Math.max(0.05, g), Math.max(0.05, g) * 1.2, Math.max(0.05, g)); }
     }
-    if (!reduceMotion) { const b = 1 + 0.02 * Math.sin(now / 1000 * 2 * Math.PI * 1.6); bodyM.scale.set(BODY.s[0] * b, BODY.s[1] * b, BODY.s[2]); }
+    if (!reduceMotion) { const b = 1 + 0.02 * Math.sin(now / 1000 * 2 * Math.PI * 1.6); bodyM.scale.set(BODY.s[0] * b, BODY.s[1] * b, BODY.s[2]); belly.scale.set(BODY.s[0] * 0.93 * b, BODY.s[1] * 0.85 * b, BODY.s[2] * 0.95); }
     // loupe pass into its render target, glass-tinted background
     renderer.setRenderTarget(rt); renderer.setClearColor(0xe4eef3, 1); look.render(scene, loupe);
     renderer.setRenderTarget(null); renderer.setClearColor(0x000000, 0);
