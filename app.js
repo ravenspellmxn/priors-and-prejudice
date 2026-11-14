@@ -306,6 +306,18 @@
     var g = Grating($("g6")), N = 20, sim, t = 0, you = 0, obs = 0, faintYou = 0, faintObs = 0, faintN = 0, bias, playing = false;
     g.set({ c: 0, dir: 1, visible: false });
     function btns(on) { $("lickL").disabled = !on; $("lickR").disabled = !on; }
+    /* the 3D rig view: loaded only when 06 opens, visual only; the 2D canvas stays as the fallback */
+    var view3d = null, loading3d = false;
+    function webgl() { try { var c = document.createElement("canvas"); return !!(c.getContext("webgl2") || c.getContext("webgl")); } catch (e) { return false; } }
+    function load3d() {
+      if (view3d || loading3d || !webgl()) return;
+      loading3d = true;
+      import("./be-the-mouse.js").then(function (m) {
+        view3d = m.mount($("win6"), $("g6"), { reduceMotion: reduce, onLick: function (s) { var b = $(s > 0 ? "lickR" : "lickL"); if (!b.disabled) b.click(); } });
+        $("win6").classList.add("is3d"); $("cap6").hidden = false;
+        if (!$("s6").hidden) view3d.start();
+      }).catch(function () { view3d = null; });
+    }
     async function present() {
       var tr = sim.trials[t];
       $("cnt6").textContent = "trial " + (t + 1) + " of " + N;
@@ -320,6 +332,7 @@
       if (ok) you++; if (tr.correct) obs++;
       if (faint) { faintN++; if (side === bias) faintYou++; if (tr.choice === bias) faintObs++; }
       $("win6").classList.add(ok ? "ok" : "no");
+      if (view3d) view3d.lick(side, ok);
       t++;
       if (t >= N) return finish();
       setTimeout(present, reduce ? 50 : 500);
@@ -341,7 +354,8 @@
       $("score6").hidden = true; $("res6").hidden = true; this.disabled = true;
       present();
     });
-    leave.s6 = function () { g.stop(); playing = false; btns(false); $("start6").disabled = false; };
+    leave.s6 = function () { g.stop(); playing = false; btns(false); $("start6").disabled = false; if (view3d) view3d.stop(); };
+    enter.s6 = function () { if (view3d) view3d.start(); else load3d(); };
   })();
 
   show();

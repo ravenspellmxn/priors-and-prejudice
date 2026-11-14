@@ -35,6 +35,9 @@
 .s1grid{display:grid;grid-template-columns:1fr 92px;gap:14px;align-items:stretch}
 .window{border-radius:14px;overflow:hidden;background:#7d8790;box-shadow:inset 0 0 0 3px var(--steel1),inset 0 0 0 4.5px var(--steel2),0 4px 10px rgba(14,34,51,.18);aspect-ratio:4/3;width:100%;max-width:100%}
 .window canvas{width:100%;height:100%;display:block}
+.window.is3d #g6{display:none}
+.window.is3d .bm3d{cursor:pointer;touch-action:manipulation}
+#cap6{margin:-6px 0 0}
 .knobrow{display:flex;align-items:center;gap:16px}
 .knob{position:relative;width:108px;height:108px;flex:none;border-radius:50%;touch-action:none;cursor:grab;
   background:radial-gradient(circle at 38% 30%,#ffffff 0 10%,#e3e8eb 30%,#a9b3ba 72%,#8a959d 100%);
@@ -325,6 +328,7 @@
   <p class="lede">20 trials in a hidden block. Watch the grating, then lick left or right. The observer plays the same trials.</p></div>
   <div class="instrument">
     <div class="window flash" id="win6"><canvas id="g6" width="320" height="240" aria-label="Grating for this trial"></canvas></div>
+    <p class="cap" id="cap6" hidden>The lab's rig, simplified</p>
     <div class="counter" id="cnt6">Tap Start</div>
     <div class="gamebtns"><button class="spout" id="lickL" disabled>← LEFT</button><button class="spout" id="lickR" disabled>RIGHT →</button></div>
     <div class="row"><button class="key" id="start6">Start</button></div>
