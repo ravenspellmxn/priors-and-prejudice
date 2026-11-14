@@ -22,7 +22,7 @@ export function mount(container, gratingCanvas, { onLick = () => {}, reduceMotio
   const canvas = document.createElement('canvas');
   canvas.className = 'bm3d';
   canvas.setAttribute('role', 'img');
-  canvas.setAttribute('aria-label', 'Three dimensional view from just behind a toy mouse at the lab rig: the grating screen ahead, the left and right lick spouts below. Use the LEFT and RIGHT buttons to lick.');
+  canvas.setAttribute('aria-label', 'Three dimensional view from behind a toy mouse at the lab rig: the grating screen ahead and the mouse\'s head below it. A round loupe in the bottom right corner shows the snout and both lick spouts up close: the tongue reaching a spout, the lick light, and a water drop after a correct lick. Use the LEFT and RIGHT buttons to lick.');
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
   const look = createStrokedToon(renderer, { ink: 0x1a2a38, dpr: Math.min(2, window.devicePixelRatio || 1) });
   renderer.shadowMap.enabled = true;
@@ -208,13 +208,25 @@ mesh(new RoundedBoxGeometry(0.7, 0.04, 0.4, 2, 0.015), M.chrome, mon, V(0, Y0 + 
 
   // camera: behind the mouse, LEVEL and square to the screen (no keystone). It sits a little above the screen's
   // centre so the mouse and spouts drop below the screen; a vertical lens shift (not a tilt) frames both.
-  const CAM_Y = 5.4, CAM_Z = 6.5, CAM_X = MON.x + 1.3;   // high enough to see over the head bar, off to the right so the spouts and LED box show
+  const CAM_Y = 2.05, CAM_Z = 2.0, CAM_X = MON.x;   // centred behind the mouse, high enough that the head drops below the screen
   camera.position.set(CAM_X, CAM_Y, CAM_Z); camera.lookAt(CAM_X, CAM_Y, MON.z);
-  // what must be in frame: the monitor's corners, the mouse's head, headcap and body, and both spout tips
+  // in frame: the monitor's corners, the ears and headcap, and the shoulders
   const fitPts = [];
   for (const sx of [-1, 1]) for (const sy of [-1, 1]) fitPts.push(V(MON.x + sx * MON.w / 2, MON.y + sy * MON.h / 2, MON.z + MON.d / 2));
-  fitPts.push(V(RX, AXIS + 0.24, 0.12), V(RX, AXIS - 0.3, 0.62), V(RX - 0.3, AXIS - 0.3, 0.9), V(RX + 0.3, AXIS - 0.3, 0.9), V(RX - 0.2, AXIS - 0.25, 1.05), V(RX + 0.2, AXIS - 0.25, 1.05));
-  for (const sx of [-1, 1]) fitPts.push(V(RX + sx * (TIP.x + 0.02), TIP.y - 0.05, TIP.z));
+  for (const sx of [-1, 1]) fitPts.push(V(RX + sx * 0.24, AXIS + 0.2, 0.2), V(RX + sx * 0.27, AXIS - 0.12, 0.5));
+
+  // loupe: a second camera close on the snout and both spouts, from just under the chin,
+  // drawn into a render target in the same renderer, then shown as a round glass inset with a chrome rim
+  const loupe = new THREE.PerspectiveCamera(40, 1, 0.01, 20);
+  loupe.position.set(RX, AXIS - 0.27, -0.02); loupe.lookAt(RX, AXIS - 0.08, -0.28);   // under the chin, facing forward: the mouse's left stays on the left
+  const rt = new THREE.WebGLRenderTarget(256, 256, { samples: 4 }); rt.texture.colorSpace = THREE.SRGBColorSpace;
+  const ov = new THREE.Scene(), ovCam = new THREE.OrthographicCamera(0, 1, 1, 0, -1, 1);
+  const lens = new THREE.Mesh(new THREE.CircleGeometry(0.5, 64), new THREE.MeshBasicMaterial({ map: rt.texture }));
+  const rim = new THREE.Mesh(new THREE.RingGeometry(0.5, 0.56, 64), new THREE.MeshBasicMaterial({ map: steelTex }));
+  const edge = new THREE.Mesh(new THREE.RingGeometry(0.56, 0.575, 64), new THREE.MeshBasicMaterial({ color: 0x8f9aa3 }));
+  // glass sheen across the lens (wetlab .glass highlight)
+  const sheen = new THREE.Mesh(new THREE.RingGeometry(0.36, 0.47, 48, 1, Math.PI * 0.58, Math.PI * 0.42), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.35, depthTest: false }));
+  ov.add(lens, rim, edge, sheen);
 
   // lick state, driven by app.js through lick(side, ok)
   const clamps = {};
@@ -227,20 +239,24 @@ mesh(new RoundedBoxGeometry(0.7, 0.04, 0.4, 2, 0.015), M.chrome, mon, V(0, Y0 + 
   function frame(now) {
     gTex.image.data.set(gCtx.getImageData(0, 0, GW, GH).data); gTex.needsUpdate = true;
     const t = (now - lk0) / 1000;                       // seconds since the lick
-    const ext = t >= 0 && t < 0.24 ? Math.sin(Math.PI * t / 0.24) : 0;
+    const ext = t >= 0 ? smooth(0, 0.07, t) * (1 - smooth(0.3, 0.42, t)) : 0;   // out, hold at the spout, back: all inside the game's 500 ms gap
     const tip = tips[side];
     tongue.quaternion.setFromUnitVectors(V(0, 1, 0), tip.clone().sub(MOUTH).normalize());
     tongue.scale.setScalar(0.25 + 0.75 * ext); tongue.scale.y = 0.05 + 1.12 * ext; tongueM.visible = ext > 0.02;
     for (const s of [-1, 1]) {
       const mine = s === side;
-      leds[s].material.color.setHex(mine && t >= 0.08 && t < 0.3 ? 0xe86aae : 0x6b4a5c);
-      clampMat[s].color.setHex(mine && ok && t >= 0.1 && t < 0.22 ? 0x35a3a0 : 0xc3cad0);   // the valve opens
-      const show = mine && ok && t >= 0.1 && t < 0.62;
+      leds[s].material.color.setHex(mine && t >= 0.05 && t < 0.4 ? 0xe86aae : 0x6b4a5c);
+      clampMat[s].color.setHex(mine && ok && t >= 0.07 && t < 0.2 ? 0x35a3a0 : 0xc3cad0);   // the valve opens
+      const show = mine && ok && t >= 0.07 && t < 0.49;
       drops[s].visible = show;
-      if (show) { const g = smooth(0.1, 0.16, t) * (1 - smooth(0.42, 0.62, t)); drops[s].scale.set(Math.max(0.05, g), Math.max(0.05, g) * 1.2, Math.max(0.05, g)); }
+      if (show) { const g = smooth(0.07, 0.14, t) * (1 - smooth(0.34, 0.49, t)); drops[s].scale.set(Math.max(0.05, g), Math.max(0.05, g) * 1.2, Math.max(0.05, g)); }
     }
     if (!reduceMotion) { const b = 1 + 0.02 * Math.sin(now / 1000 * 2 * Math.PI * 1.6); bodyM.scale.set(BODY.s[0] * b, BODY.s[1] * b, BODY.s[2]); }
+    // loupe pass into its render target, glass-tinted background
+    renderer.setRenderTarget(rt); renderer.setClearColor(0xe4eef3, 1); look.render(scene, loupe);
+    renderer.setRenderTarget(null); renderer.setClearColor(0x000000, 0);
     look.render(scene, camera);
+    renderer.autoClear = false; renderer.render(ov, ovCam); renderer.autoClear = true;
   }
   function resize() {
     const w = Math.max(1, container.clientWidth), h = Math.max(1, container.clientHeight);
@@ -254,6 +270,12 @@ mesh(new RoundedBoxGeometry(0.7, 0.04, 0.4, 2, 0.015), M.chrome, mon, V(0, Y0 + 
     camera.projectionMatrix.elements[9] = centre / halfH;   // lens shift, not a tilt: the view stays level and square, so the screen stays a rectangle
     camera.projectionMatrix.elements[8] = centreX / (halfH * camera.aspect);
     camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
+    // loupe inset: about 30% of the window width, bottom right
+    const d = Math.round(Math.min(w * 0.3, h * 0.45)), mg = Math.round(d * 0.08) + 4, cx = w - mg - d / 2, cy = mg + d / 2;
+    ovCam.left = 0; ovCam.right = w; ovCam.top = h; ovCam.bottom = 0; ovCam.updateProjectionMatrix();
+    for (const o of [lens, rim, edge, sheen]) { o.position.set(cx, cy, 0); o.scale.set(d, d, 1); }
+    const px = Math.min(512, Math.round(d * Math.min(2, window.devicePixelRatio || 1)));
+    rt.setSize(px, px);
   }
   const ro = new ResizeObserver(resize); ro.observe(container);
   container.appendChild(canvas); resize();
